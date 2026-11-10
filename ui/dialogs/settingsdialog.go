@@ -647,6 +647,7 @@ func (s *SettingsDialog) doChooseTTFFile(window fyne.Window, entry *widget.Entry
 	dlg := dialog.NewFileOpen(callback, window)
 	dlg.SetFilter(&storage.ExtensionFileFilter{Extensions: []string{".ttf"}})
 	dlg.Show()
+	dlg.Resize(fyne.NewSize(800, 600))
 }
 
 func (s *SettingsDialog) ttfPathValidator(path string) error {
