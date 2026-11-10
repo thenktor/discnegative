@@ -216,7 +216,7 @@ func DefaultConfig(appVersionTag string) *Config {
 		},
 		AlbumsPage: AlbumsPageConfig{
 			SortOrder:   string("Recently Added"),
-			ShowYears:   false,
+			ShowYears:   true,
 			ShuffleMode: "Tracks",
 		},
 		ArtistPage: ArtistPageConfig{
@@ -229,7 +229,7 @@ func DefaultConfig(appVersionTag string) *Config {
 		FavoritesPage: FavoritesPageConfig{
 			TracklistColumns: []string{"Album", "Time", "Plays"},
 			InitialView:      "Albums",
-			ShowAlbumYears:   false,
+			ShowAlbumYears:   true,
 		},
 		GridView: GridViewConfig{
 			CardSize: 200,
