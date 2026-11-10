@@ -4,10 +4,17 @@ SRCS := $(wildcard *.go) $(wildcard */*.go) $(shell find backend/) $(shell find 
 .PHONY: build
 build: bin/${NAME}
 
+UNAME_S := $(shell uname -s)
+ifeq ($(filter __FreeBSD__ __NetBSD__,$(UNAME_S)),)
+TAGS := migrated_fynedo
+else
+TAGS := migrated_fynedo,x11
+endif
+
 bin/${NAME}: $(SRCS)
 	@mkdir -p bin/
 	@echo "Building..."
-	go build -tags migrated_fynedo -ldflags "-s -w" -o bin/${NAME}
+	go build -tags $(TAGS) -ldflags "-s -w" -o bin/${NAME}
 
 # dylibbundler doesn't seem to pick up on the Python framework dependency,
 # so the last 3 cmds move it over manually. This is a bit fragile though
