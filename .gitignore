@@ -17,7 +17,7 @@ Supersonic.app
 Supersonic.AppDir/
 appimagetool-x86_64.AppImage
 tmp/
-
+bin/
 
 # Test binary, built with `go test -c`
 *.test

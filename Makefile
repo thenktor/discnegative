@@ -1,11 +1,19 @@
-build:
-	go build -tags migrated_fynedo
+NAME := $(shell basename $(shell go list -m))
+SRCS := $(wildcard *.go) $(wildcard */*.go) $(shell find backend/) $(shell find ui/) $(shell find res/)
+
+.PHONY: build
+build: bin/${NAME}
+
+bin/${NAME}: $(SRCS)
+	@mkdir -p bin/
+	@echo "Building..."
+	go build -tags migrated_fynedo -ldflags "-s -w" -o bin/${NAME}
 
 # dylibbundler doesn't seem to pick up on the Python framework dependency,
 # so the last 3 cmds move it over manually. This is a bit fragile though
 # since it assumes a specific location and version of the dependency
-package_macos:
-	fyne package -os darwin -tags migrated_fynedo
+.PHONY: package_macos
+package_macos: Supersonic.app
 
 bundledeps_macos_homebrew:
 	dylibbundler -od -b -x ./Supersonic.app/Contents/MacOS/supersonic -d ./Supersonic.app/Contents/Frameworks/ -p @executable_path/../Frameworks/
@@ -30,6 +38,16 @@ package_windows:
 package_linux:
 	fyne package -os linux -tags migrated_fynedo
 
+Supersonic.app:
+	MACOSX_DEPLOYMENT_TARGET=10.13.2 fyne package -os darwin -tags migrated_fynedo
+
 .PHONY: lint
 lint:
 	golangci-lint run
+
+.PHONY: clean
+clean:
+	go clean
+	rm -rf bin/
+	rm -rf tar/
+	rm -rf Supersonic.app

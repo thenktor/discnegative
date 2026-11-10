@@ -1,9 +1,10 @@
 [Details]
-  Icon = "res/appicon-512.png"
-  Name = "Supersonic"
-  ID = "io.github.supersonic-app.supersonic"
-  Version = "0.22.1"
+Icon = "res/appicon-512.png"
+Name = "Supersonic"
+ID = "io.github.supersonic-app.supersonic"
+Version = "0.22.1"
+Build = 2
 
 [LinuxAndBSD]
-  Categories = ["Audio", "AudioVideo"]
-  Comment = "A lightweight cross-platform desktop client for self-hosted music servers"
+Categories = ["Audio", "AudioVideo"]
+Comment = "A lightweight cross-platform desktop client for self-hosted music servers"
