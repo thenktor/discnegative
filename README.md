@@ -1,6 +1,9 @@
-<img src="res/appicon-128.png" alt="Supersonic logo" title="Supersonic" align="left" height="60px"/>
-<a href='https://flathub.org/apps/details/io.github.dweymouth.supersonic'><img height="50px" align="right" alt='Download on Flathub' src='https://flathub.org/assets/badges/flathub-badge-en.png'/></a>
-<a href='https://ko-fi.com/dweymouth'><img height='40' align='right' src='https://cdn.ko-fi.com/cdn/kofi1.png?v=3' border='0' alt='Buy Me a Coffee at ko-fi.com'/></a>
+# Fork
+
+This is a fork of [Supersonic](https://github.com/supersonic-app/supersonic). I've made the fork to fit the app my personal preferences:
+
+* Removed the features, I do not need
+* Tweaked the UI
 
 # Supersonic
 
