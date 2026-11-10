@@ -5,7 +5,7 @@ SRCS := $(wildcard *.go) $(wildcard */*.go) $(shell find backend/) $(shell find 
 build: bin/${NAME}
 
 UNAME_S := $(shell uname -s)
-ifeq ($(filter __FreeBSD__ __NetBSD__,$(UNAME_S)),)
+ifeq ($(filter FreeBSD NetBSD,$(UNAME_S)),)
 TAGS := migrated_fynedo
 else
 TAGS := migrated_fynedo,x11
