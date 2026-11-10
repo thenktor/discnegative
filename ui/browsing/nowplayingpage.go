@@ -186,6 +186,7 @@ func NewNowPlayingPage(
 	}
 	a.lyricsViewer = widgets.NewLyricsViewer(a.onSeekToLyricLine)
 	a.statusLabel = widget.NewLabel(lang.L("Stopped"))
+	a.statusLabel.TextStyle.Monospace = true
 
 	a.Reload()
 	return a
