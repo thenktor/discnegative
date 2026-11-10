@@ -567,41 +567,10 @@ func (a *NowPlayingPage) saveSelectedTab(tabNum int) {
 
 func (a *NowPlayingPage) formatStatusLine() {
 	curPlayer := a.pm.CurrentPlayer()
-	playerStats := a.pm.PlaybackStatus()
 	lastStatus := a.statusLabel.Text
-	stopped := lang.L("Stopped")
-	state := stopped
-	switch playerStats.State {
-	case player.Paused:
-		state = lang.L("Paused")
-	case player.Playing:
-		state = lang.L("Playing")
-	}
 
-	dur := 0.0
-	if np := a.pm.NowPlaying(); np != nil {
-		dur = np.Metadata().Duration.Seconds()
-	}
-	statusSuffix := ""
-	trackNum := 0
-	if state != stopped {
-		trackNum = a.pm.NowPlayingIndex() + 1
-		statusSuffix = fmt.Sprintf(" %s/%s",
-			util.SecondsToMMSS(playerStats.TimePos),
-			util.SecondsToMMSS(dur))
-	}
-	status := fmt.Sprintf("%s (%d/%d)%s · %s: %s", state, trackNum,
-		len(a.queue), statusSuffix, lang.L("Total time"), util.SecondsToTimeString(a.totalTime))
-
-	mediaInfo := ""
-	if state != stopped {
-		mediaInfo = a.formatMediaInfoStr(curPlayer)
-	}
-	if mediaInfo != "" {
-		mediaInfo = " | " + mediaInfo
-	}
-
-	a.statusLabel.Text = fmt.Sprintf("%s%s", status, mediaInfo)
+	mediaInfo := a.formatMediaInfoStr(curPlayer)
+	a.statusLabel.Text = mediaInfo
 	if lastStatus != a.statusLabel.Text {
 		a.statusLabel.Refresh()
 	}
