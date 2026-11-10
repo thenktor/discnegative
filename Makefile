@@ -59,7 +59,7 @@ package_linux:
 package_freebsd:
 	fyne package -os freebsd -tags migrated_fynedo,x11
 
-Supersonic.app:
+Supersonic.app: $(SRCS)
 	MACOSX_DEPLOYMENT_TARGET=10.13.2 fyne package -os darwin -tags migrated_fynedo
 
 Supersonic.zip: Supersonic.app
