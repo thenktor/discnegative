@@ -10,7 +10,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/supersonic-app/supersonic)](https://goreportcard.com/report/github.com/supersonic-app/supersonic)
 [![Discord](https://dcbadge.limes.pink/api/server/H6FC9bAMpF?style=flat)](https://discord.gg/H6FC9bAMpF)
 
-A lightweight cross-platform desktop client for Subsonic and Jellyfin music servers.
+A lightweight cross-platform desktop client for Subsonic-compatible music servers.
 
 [Jump to installation instructions](https://github.com/supersonic-app/supersonic#installation)
 
@@ -25,10 +25,9 @@ Screenshots of Supersonic running against the Navidrome demo server, showcasing 
 
 ## Supported servers
 
-Supersonic supports any music server with a Subsonic (or OpenSubsonic) API, or Jellyfin. A partial list of supported servers is as follows:
+Supersonic supports any music server with a Subsonic (or OpenSubsonic) API. A partial list of supported servers is as follows:
 
 * [Navidrome](https://navidrome.org)
-* [Jellyfin](https://jellyfin.org)
 * [Gonic](https://github.com/sentriz/gonic)
 * [LMS](https://github.com/epoupon/lms)
 * [Nextcloud Music](https://apps.nextcloud.com/apps/music)

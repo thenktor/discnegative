@@ -24,26 +24,4 @@ func TestNormalizeServerURL(t *testing.T) {
 	}
 }
 
-func TestNormalizeJellyfinURL(t *testing.T) {
-	tests := []struct {
-		input string
-		want  string
-	}{
-		{"", ""},
-		{"http://192.168.1.1:8096", "http://192.168.1.1:8096"},
-		{"192.168.1.1:8096", "http://192.168.1.1:8096"},
-		{"192.168.1.1:8096/", "http://192.168.1.1:8096"},
-		{"192.168.1.1:8096/web/index.html", "http://192.168.1.1:8096"},
-		{"http://192.168.1.1:8096/web/index.html", "http://192.168.1.1:8096"},
-		{"http://192.168.1.1:8096/web/", "http://192.168.1.1:8096"},
-		{"http://192.168.1.1:8096/web", "http://192.168.1.1:8096"},
-		{"https://jellyfin.example.com/web/index.html", "https://jellyfin.example.com"},
-		{"https://jellyfin.example.com/web/", "https://jellyfin.example.com"},
-	}
-	for _, tt := range tests {
-		got := NormalizeJellyfinURL(tt.input)
-		if got != tt.want {
-			t.Errorf("NormalizeJellyfinURL(%q) = %q, want %q", tt.input, got, tt.want)
-		}
-	}
-}
+

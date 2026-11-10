@@ -52,22 +52,13 @@ func NewAddEditServerDialog(title string, cancelable bool, prefillServer *backen
 	titleLabel := widget.NewLabel(title)
 	titleLabel.TextStyle.Bold = true
 	legacyAuthCheck := widget.NewCheckWithData(lang.L("Use legacy authentication"), binding.BindBool(&a.LegacyAuth))
-	serverTypeChoice := widget.NewRadioGroup([]string{"Subsonic", "Jellyfin"}, func(s string) {
+	serverTypeChoice := widget.NewRadioGroup([]string{"Subsonic"}, func(s string) {
 		a.ServerType = backend.ServerType(s)
-		if s == string(backend.ServerTypeSubsonic) {
-			legacyAuthCheck.Show()
-		} else {
-			legacyAuthCheck.Hide()
-		}
 	})
 	skipSSLCheck := widget.NewCheckWithData(lang.L("Skip SSL certificate verification"), binding.BindBool(&a.SkipSSLVerify))
 	serverTypeChoice.Required = true
 	serverTypeChoice.Horizontal = true
-	selected := backend.ServerTypeSubsonic
-	if a.ServerType == backend.ServerTypeJellyfin {
-		selected = backend.ServerTypeJellyfin
-	}
-	serverTypeChoice.Selected = string(selected)
+	serverTypeChoice.Selected = string(backend.ServerTypeSubsonic)
 	a.passField = widget.NewPasswordEntry()
 	a.passField.OnSubmitted = func(_ string) { a.doSubmit() }
 	userField := widget.NewEntryWithData(binding.BindString(&a.Username))

@@ -12,7 +12,6 @@ type ServerType string
 
 const (
 	ServerTypeSubsonic ServerType = "Subsonic"
-	ServerTypeJellyfin ServerType = "Jellyfin"
 )
 
 type ServerConnection struct {
@@ -296,14 +295,6 @@ func ReadConfigFile(filepath, appVersionTag string) (*Config, error) {
 		return nil, err
 	}
 	c.migrateDeprecatedSettings()
-
-	// Backfill Subsonic to empty ServerType fields
-	// for updating configs created before multiple MediaProviders were added
-	for _, s := range c.Servers {
-		if s.ServerType == "" {
-			s.ServerType = ServerTypeSubsonic
-		}
-	}
 
 	return c, nil
 }

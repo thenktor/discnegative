@@ -23,7 +23,6 @@ var (
 
 	WhatsFixed = `
 ## Fixed
-* Some authentication failures with Jellyfin
 * Inconsistent character baseline with some CJK text
 * Wayland: crash when "fn" key is pressed
 * Wayland: Application tray icon shows multiple windows are open
