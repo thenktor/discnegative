@@ -126,8 +126,10 @@ func NewPlayerControls(_ bool, initialLoopMode backend.LoopMode, initialShuffle 
 	pc.slider.Disable()
 	pc.curTimeLabel = NewLabelMinSize(util.SecondsToMMSS(0), 55)
 	pc.curTimeLabel.Alignment = fyne.TextAlignTrailing
+	pc.curTimeLabel.TextStyle.Monospace = true
 	pc.totalTimeLabel = NewLabelMinSize(util.SecondsToMMSS(0), 55)
 	pc.totalTimeLabel.Alignment = fyne.TextAlignTrailing
+	pc.totalTimeLabel.TextStyle.Monospace = true
 
 	pc.slider.OnChanged = func(f float64) {
 		if pc.slider.IsDragging() {
