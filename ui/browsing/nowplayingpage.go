@@ -201,9 +201,11 @@ func (a *NowPlayingPage) CreateRenderer() fyne.WidgetRenderer {
 	if a.container == nil {
 		initialTab := 0
 		if a.conf.InitialView == "Lyrics" {
-			initialTab = 1
+			initialTab = 0
 		} else if a.conf.InitialView == "Related" {
-			initialTab = 2
+			initialTab = 1
+		} else if a.conf.InitialView == "Play Queue" {
+			initialTab = 0
 		}
 		_ = initialTab
 		paddedLayout := &layouts.PercentPadLayout{
@@ -213,8 +215,6 @@ func (a *NowPlayingPage) CreateRenderer() fyne.WidgetRenderer {
 		a.lyricsLoading = widgets.NewLoadingDots()
 		a.relatedLoading = widgets.NewLoadingDots()
 		a.tabs = container.NewAppTabs(
-			container.NewTabItem(lang.L("Play Queue"),
-				container.NewBorder(layout.NewSpacer(), nil, nil, nil, a.queueList)),
 			container.NewTabItem(lang.L("Lyrics"), container.NewStack(
 				a.lyricsViewer,
 				container.NewCenter(a.lyricsLoading))),
@@ -226,15 +226,15 @@ func (a *NowPlayingPage) CreateRenderer() fyne.WidgetRenderer {
 		a.tabs.OnSelected = func(*container.TabItem) {
 			idx := a.tabs.SelectedIndex()
 			a.saveSelectedTab(idx)
-			if idx == 1 /*lyrics*/ {
+			if idx == 0 /*lyrics*/ {
 				a.updateLyrics()
-			} else if idx == 2 /*related*/ {
+			} else if idx == 1 /*related*/ {
 				a.updateRelatedList()
 			}
 		}
-		if initialTab == 1 /*lyrics*/ {
+		if initialTab == 0 /*lyrics*/ {
 			a.updateLyrics()
-		} else if initialTab == 2 /*related*/ {
+		} else if initialTab == 1 /*related*/ {
 			a.updateRelatedList()
 		}
 		c := theme.Color(myTheme.ColorNamePageBackground)
@@ -280,11 +280,8 @@ func (a *NowPlayingPage) Route() controller.Route {
 var _ Scrollable = (*NowPlayingPage)(nil)
 
 func (a *NowPlayingPage) Scroll(delta float32) {
-	switch a.tabs.SelectedIndex() {
-	case 0: /*play queue*/
-		a.queueList.Scroll(delta)
-	case 1: /*lyrics*/
-	case 2: /*related*/
+	idx := a.tabs.SelectedIndex()
+	if idx == 1 /*related*/ {
 		a.relatedList.Scroll(delta)
 	}
 }
@@ -315,9 +312,9 @@ func (a *NowPlayingPage) OnSongChange(song mediaprovider.MediaItem, lastScrobble
 		})
 	}
 
-	if a.tabs != nil && a.tabs.SelectedIndex() == 1 /*lyrics*/ {
+	if a.tabs != nil && a.tabs.SelectedIndex() == 0 /*lyrics*/ {
 		a.updateLyrics()
-	} else if a.tabs != nil && a.tabs.SelectedIndex() == 2 /*related*/ {
+	} else if a.tabs != nil && a.tabs.SelectedIndex() == 1 /*related*/ {
 		a.updateRelatedList()
 	}
 }
@@ -490,11 +487,11 @@ func (a *NowPlayingPage) Reload() {
 	if a.tabs == nil {
 		return
 	}
-	switch a.tabs.SelectedIndex() {
-	case 1: /*lyrics*/
+	idx := a.tabs.SelectedIndex()
+	if idx == 0 /*lyrics*/ {
 		a.lastPlayPos = a.pm.PlaybackStatus().TimePos
 		a.updateLyrics()
-	case 2: /*related*/
+	} else if idx == 1 /*related*/ {
 		a.updateRelatedList()
 	}
 }
@@ -508,7 +505,7 @@ var _ CanShowPlayTime = (*NowPlayingPage)(nil)
 func (a *NowPlayingPage) OnPlayTimeUpdate(curTime, _ float64, seeked bool) {
 	a.lastPlayPos = curTime
 	a.formatStatusLine()
-	if a.tabs == nil || a.tabs.SelectedIndex() != 1 /*lyrics*/ {
+	if a.tabs == nil || a.tabs.SelectedIndex() != 0 /*lyrics*/ {
 		return
 	}
 	if seeked {
@@ -520,10 +517,7 @@ func (a *NowPlayingPage) OnPlayTimeUpdate(curTime, _ float64, seeked bool) {
 
 func (a *NowPlayingPage) currentTracklistOrNil() *widgets.PlayQueueList {
 	if a.tabs != nil {
-		switch a.tabs.SelectedIndex() {
-		case 0: /*queue*/
-			return a.queueList
-		case 2: /*related*/
+		if a.tabs.SelectedIndex() == 1 /*related*/ {
 			return a.relatedList
 		}
 	}
@@ -562,10 +556,8 @@ func (a *NowPlayingPage) saveSelectedTab(tabNum int) {
 	var tabName string
 	switch tabNum {
 	case 0:
-		tabName = "Play Queue"
-	case 1:
 		tabName = "Lyrics"
-	case 2:
+	case 1:
 		tabName = "Related"
 	}
 	a.conf.InitialView = tabName
