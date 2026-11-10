@@ -67,6 +67,7 @@ var (
 	SidebarIcon   fyne.Resource = theme.NewThemedResource(res.ResSidebarSvg)
 	SortIcon      fyne.Resource = theme.NewThemedResource(res.ResUpdownarrowSvg)
 	LibraryIcon   fyne.Resource = theme.NewThemedResource(res.ResLibrarySvg)
+	JumpToCurrentTrackIcon fyne.Resource = theme.NewThemedResource(res.ResJumpToCurrentTrackSvg)
 	SaveIcon          fyne.Resource = theme.NewThemedResource(res.ResSaveSvg)
 	SaveAsIcon        fyne.Resource = theme.NewThemedResource(res.ResSaveasSvg)
 )

@@ -176,6 +176,13 @@ var ResSaveasSvg = &fyne.StaticResource{
 	StaticContent: ResSaveasSvgData,
 }
 
+//go:embed icons/publicdomain/jump-to-current-track.svg
+var ResJumpToCurrentTrackSvgData []byte
+var ResJumpToCurrentTrackSvg = &fyne.StaticResource{
+	StaticName:    "icons/publicdomain/jump-to-current-track.svg",
+	StaticContent: ResJumpToCurrentTrackSvgData,
+}
+
 //go:embed icons/remix_design/broadcast.svg
 var ResBroadcastSvgData []byte
 var ResBroadcastSvg = &fyne.StaticResource{

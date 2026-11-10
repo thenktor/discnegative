@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Transformed by: SVG Repo Mixer Tools -->
+
+<svg
+   fill="#000000"
+   width="800px"
+   height="800px"
+   viewBox="0 0 32 32"
+   style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;"
+   version="1.1"
+   xml:space="preserve"
+   stroke="#000000"
+   stroke-width="0.48"
+   id="svg4"
+   sodipodi:docname="jump-to-current-track.svg"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+   id="defs4"><style
+     id="current-color-scheme"
+     type="text/css">
+   .ColorScheme-Text { color:#424242; } .ColorScheme-Highlight { color:#eeeeee; }
+  </style></defs><sodipodi:namedview
+   id="namedview4"
+   pagecolor="#ffffff"
+   bordercolor="#000000"
+   borderopacity="0.25"
+   inkscape:showpageshadow="2"
+   inkscape:pageopacity="0.0"
+   inkscape:pagecheckerboard="0"
+   inkscape:deskcolor="#d1d1d1"
+   inkscape:zoom="0.35"
+   inkscape:cx="401.42857"
+   inkscape:cy="400"
+   inkscape:window-width="1440"
+   inkscape:window-height="767"
+   inkscape:window-x="0"
+   inkscape:window-y="29"
+   inkscape:window-maximized="0"
+   inkscape:current-layer="SVGRepo_iconCarrier" />
+
+<g
+   id="SVGRepo_bgCarrier"
+   stroke-width="0" />
+
+<g
+   id="SVGRepo_tracerCarrier"
+   stroke-linecap="round"
+   stroke-linejoin="round" />
+
+<g
+   id="SVGRepo_iconCarrier">
+
+
+
+
+
+
+
+<g
+   id="g4"
+   transform="matrix(1.2240897,0,0,1.2240897,-3.5854342,-3.3393096)"><path
+     d="M 15.994,10 H 27 C 27.552,10 28,9.552 28,9 28,8.448 27.552,8 27,8 H 15.994 c -0.552,0 -1,0.448 -1,1 0,0.552 0.448,1 1,1 z"
+     id="path3" /><path
+     d="M 12.496,9.868 C 12.808,9.69 13,9.359 13,9 13,8.641 12.808,8.31 12.496,8.132 l -7,-4 C 5.187,3.955 4.806,3.956 4.498,4.135 4.19,4.314 4,4.644 4,5 v 8 c 0,0.356 0.19,0.686 0.498,0.865 0.308,0.179 0.689,0.18 0.998,0.003 z"
+     id="path4" /></g>
+
+<g
+   id="surface1"
+   style="fill:#000000"
+   transform="matrix(1.2633631,0,0,1.2633631,2.9872676,6.9848865)"><defs
+     id="defs2"><style
+       id="style4"
+       type="text/css">
+   .ColorScheme-Text { color:#424242; } .ColorScheme-Highlight { color:#eeeeee; }
+  </style></defs><path
+     style="color:#424242;fill:#000000"
+     class="ColorScheme-Text"
+     d="M 11.035156,5 C 7.691406,5 5,7.691406 5,11.035156 c 0,3.34375 2.691406,6.035156 6.035156,6.035156 1.304688,0 2.511719,-0.414062 3.5,-1.113281 L 17.578125,19 19,17.578125 15.957031,14.535156 c 0.699219,-0.988281 1.113281,-2.195312 1.113281,-3.5 C 17.070312,7.691406 14.378906,5 11.035156,5 Z m 0,2.011719 c 2.226563,0 4.023438,1.792969 4.023438,4.023437 0,2.226563 -1.796875,4.023438 -4.023438,4.023438 -2.230468,0 -4.023437,-1.796875 -4.023437,-4.023438 0,-2.230468 1.792969,-4.023437 4.023437,-4.023437 z m 0,0"
+     id="path1-9" /></g></g>
+
+</svg>

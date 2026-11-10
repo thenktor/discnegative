@@ -37,6 +37,7 @@ type PlayQueueList struct {
 	Reorderable    bool
 	DisableRating  bool
 	DisableSharing bool
+	ShowScrollToNowPlaying bool // Whether to show the scroll-to-now-playing header
 
 	// user action callbacks
 	OnPlayItemAt        func(idx int)
@@ -63,10 +64,11 @@ type PlayQueueList struct {
 	colLayout   *layouts.ColumnsLayout
 	tracksMutex sync.RWMutex
 	items       []*util.TrackListModel
+	header      fyne.CanvasObject
 }
 
 func NewPlayQueueList(im *backend.ImageManager, useNonQueueMenu bool) *PlayQueueList {
-	p := &PlayQueueList{useNonQueueMenu: useNonQueueMenu}
+	p := &PlayQueueList{useNonQueueMenu: useNonQueueMenu, ShowScrollToNowPlaying: true}
 	p.ExtendBaseWidget(p)
 
 	// #, Cover, Title/Artist, Time
@@ -180,7 +182,13 @@ func (p *PlayQueueList) ScrollToNowPlaying() {
 	idx := slices.IndexFunc(p.items, func(item *util.TrackListModel) bool {
 		return item.Item.Metadata().ID == p.nowPlayingID
 	})
-	p.list.ScrollTo(idx)
+	if idx >= 0 {
+		// Get the height of a single row
+		row := p.list.CreateItem()
+		itemHeight := row.MinSize().Height
+		// Scroll to position the now playing track at the top
+		p.list.ScrollToOffset(float32(idx) * itemHeight)
+	}
 }
 
 func (p *PlayQueueList) Refresh() {
@@ -351,7 +359,24 @@ func (t *PlayQueueList) selectedIdxs() []int {
 }
 
 func (p *PlayQueueList) CreateRenderer() fyne.WidgetRenderer {
+	if p.ShowScrollToNowPlaying && p.header == nil {
+		p.createHeader()
+	}
+	if p.header != nil {
+		return widget.NewSimpleRenderer(container.NewBorder(p.header, nil, nil, nil, p.list))
+	}
 	return widget.NewSimpleRenderer(p.list)
+}
+
+func (p *PlayQueueList) createHeader() {
+	// Create scroll to now playing button with tooltip
+	scrollToNowPlayingBtn := ttwidget.NewButtonWithIcon("", myTheme.JumpToCurrentTrackIcon, func() {
+		p.ScrollToNowPlaying()
+	})
+	scrollToNowPlayingBtn.SetToolTip(lang.L("Scroll to now playing"))
+	scrollToNowPlayingBtn.Importance = widget.LowImportance
+	
+	p.header = container.NewHBox(scrollToNowPlayingBtn, layout.NewSpacer())
 }
 
 type PlayQueueListRow struct {

@@ -134,6 +134,7 @@ func NewNowPlayingPage(
 
 	a.queueList = widgets.NewPlayQueueList(a.im, false)
 	a.relatedList = widgets.NewPlayQueueList(a.im, true)
+	a.relatedList.ShowScrollToNowPlaying = false
 	a.queueList.Reorderable = true
 
 	a.contr.ConnectPlayQueuelistActions(a.queueList)
