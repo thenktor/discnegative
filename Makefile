@@ -9,7 +9,12 @@ ifeq ($(filter __FreeBSD__ __NetBSD__,$(UNAME_S)),)
 TAGS := migrated_fynedo
 else
 TAGS := migrated_fynedo,x11
+CGO_CFLAGS := -I/usr/local/include
+CGO_LDFLAGS := -L/usr/local/lib
 endif
+
+export CGO_CFLAGS
+export CGO_LDFLAGS
 
 bin/${NAME}: $(SRCS)
 	@mkdir -p bin/
