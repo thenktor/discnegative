@@ -3,7 +3,6 @@ package ui
 import (
 	"github.com/supersonic-app/supersonic/backend"
 	"github.com/supersonic-app/supersonic/backend/mediaprovider"
-	"github.com/supersonic-app/supersonic/backend/player/mpv"
 	"github.com/supersonic-app/supersonic/ui/controller"
 	"github.com/supersonic-app/supersonic/ui/layouts"
 	"github.com/supersonic-app/supersonic/ui/util"
@@ -36,7 +35,6 @@ func NewBottomPanel(pm *backend.PlaybackManager, im *backend.ImageManager, contr
 
 	pm.OnSongChange(bp.onSongChange)
 	pm.OnRadioMetadataChange(bp.onRadioMetadataChange)
-	pm.OnWaveformImgUpdate(bp.updateWaveformImg)
 	pm.OnPlayTimeUpdate(func(cur, total float64, _ bool) {
 		fyne.Do(func() {
 			if !pm.IsSeeking() {
@@ -91,7 +89,7 @@ func NewBottomPanel(pm *backend.PlaybackManager, im *backend.ImageManager, contr
 			contr.ShowShareDialog(tr.ID)
 		}
 	}
-	bp.Controls = widgets.NewPlayerControls(cfg.Playback.UseWaveformSeekbar, pm.GetLoopMode(), pm.IsShuffle())
+	bp.Controls = widgets.NewPlayerControls(false, pm.GetLoopMode(), pm.IsShuffle())
 	bp.Controls.OnPlayPause(func() {
 		pm.PlayPause()
 	})
@@ -121,18 +119,13 @@ func NewBottomPanel(pm *backend.PlaybackManager, im *backend.ImageManager, contr
 	pm.OnVolumeChange(func(vol int) {
 		fyne.Do(func() { bp.AuxControls.VolumeControl.SetVolume(vol) })
 	})
-	pm.OnPlayerChange(func() {
-		_, local := pm.CurrentPlayer().(*mpv.Player)
-		fyne.Do(func() { bp.AuxControls.SetIsRemotePlayer(!local) })
-	})
+
 	bp.AuxControls.VolumeControl.OnSetVolume = func(v int) {
 		pm.SetVolume(v)
 	}
 	bp.AuxControls.OnChangeAutoplay = func(autoplay bool) {
 		pm.SetAutoplay(autoplay)
 	}
-	bp.AuxControls.OnShowPlayQueue(contr.ShowPopUpPlayQueue)
-	bp.AuxControls.OnShowCastMenu(contr.ShowCastMenu)
 
 	bp.imageLoader = util.NewThumbnailLoader(im, bp.NowPlaying.SetImage)
 
@@ -160,12 +153,6 @@ func (bp *BottomPanel) onRadioMetadataChange(radioName, title, artist string) {
 			ArtistNames: []string{artist},
 			Album:       radioName,
 		})
-	})
-}
-
-func (bp *BottomPanel) updateWaveformImg(img *backend.WaveformImage) {
-	fyne.Do(func() {
-		bp.Controls.UpdateWaveformImg(img)
 	})
 }
 

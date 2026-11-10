@@ -48,7 +48,6 @@ type PlayQueueList struct {
 	OnSetFavorite       func(trackIDs []string, fav bool)
 	OnSetRating         func(trackIDs []string, rating int)
 	OnRemoveFromQueue   func(idxs []int)
-	OnDownload          func(tracks []*mediaprovider.Track, downloadName string)
 	OnShowTrackInfo     func(track *mediaprovider.Track)
 	OnShare             func(tracks []*mediaprovider.Track)
 	OnShowArtistPage    func(artistID string)
@@ -293,9 +292,6 @@ func (p *PlayQueueList) ensureTracksMenu() {
 	}
 	p.menu.OnPlaySongRadio = func() {
 		p.OnPlaySongRadio(p.selectedTracks()[0])
-	}
-	p.menu.OnDownload = func() {
-		p.OnDownload(p.selectedTracks(), "Selected tracks")
 	}
 	p.menu.OnAddToPlaylist = func() {
 		p.OnAddToPlaylist(p.selectedItemIDs())

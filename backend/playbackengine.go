@@ -346,8 +346,6 @@ func (p *playbackEngine) loadTrackPaused(idx int, startTime float64) error {
 	p.pendingLoadPaused = true
 	p.pendingLoadStartTime = startTime
 
-	// Pre-generate the waveform image for the paused track using the same hook
-	// that normally pre-generates waveforms for the upcoming track.
 	for _, cb := range p.onBeforeSongChange {
 		cb(nowPlaying)
 	}
@@ -1170,9 +1168,6 @@ func (p *playbackEngine) startPollTimePos() {
 	ctx, cancel := context.WithCancel(p.ctx)
 	p.cancelPollPos = cancel
 	pollFrequency := 250 * time.Millisecond
-	if p.playbackCfg.UseWaveformSeekbar {
-		pollFrequency = 100 * time.Millisecond
-	}
 	pollingTick := time.NewTicker(pollFrequency)
 
 	go func() {

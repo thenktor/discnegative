@@ -67,7 +67,6 @@ type Tracklist struct {
 	OnAddToPlaylist     func(trackIDs []string)
 	OnSetFavorite       func(trackIDs []string, fav bool)
 	OnSetRating         func(trackIDs []string, rating int)
-	OnDownload          func(tracks []*mediaprovider.Track, downloadName string)
 	OnShare             func(trackID string)
 	OnPlaySongRadio     func(track *mediaprovider.Track)
 	OnReorderTracks     func(trackIDs []string, insertPos int)
@@ -531,9 +530,6 @@ func (t *Tracklist) onShowContextMenu(e *fyne.PointEvent, trackIdx int) {
 		t.ctxMenu.OnAddToPlaylist = func() {
 			t.OnAddToPlaylist(t.SelectedTrackIDs())
 		}
-		t.ctxMenu.OnDownload = func() {
-			t.onDownload(t.SelectedTracks(), "Selected tracks")
-		}
 		t.ctxMenu.OnShowInfo = func() {
 			t.OnShowTrackInfo(t.SelectedTracks()[0])
 		}
@@ -605,12 +601,6 @@ func (t *Tracklist) onAlbumTapped(albumID string) {
 func (t *Tracklist) onGenreTapped(genre string) {
 	if t.OnShowGenrePage != nil {
 		t.OnShowGenrePage(genre)
-	}
-}
-
-func (t *Tracklist) onDownload(tracks []*mediaprovider.Track, downloadName string) {
-	if t.OnDownload != nil {
-		t.OnDownload(tracks, downloadName)
 	}
 }
 

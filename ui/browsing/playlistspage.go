@@ -178,16 +178,6 @@ func (a *PlaylistsPage) createGridView(playlists []*mediaprovider.Playlist) {
 			})
 		}()
 	}
-	a.gridView.OnDownload = func(id string) {
-		go func() {
-			pl, err := a.contr.App.ServerManager.Server.GetPlaylist(id)
-			if err != nil {
-				log.Printf("error loading playlist: %s", err.Error())
-				return
-			}
-			fyne.Do(func() { a.contr.ShowDownloadDialog(pl.Tracks, pl.Name) })
-		}()
-	}
 }
 
 func (a *PlaylistsPage) showListView() {

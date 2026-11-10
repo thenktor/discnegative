@@ -127,22 +127,14 @@ type PlaybackConfig struct {
 	RepeatMode               string
 	SkipOneStarWhenShuffling bool
 	SkipKeywordWhenShuffling string
-	UseWaveformSeekbar       bool
 }
 
 type LocalPlaybackConfig struct {
-	AudioDeviceName       string
-	AudioExclusive        bool
-	InMemoryCacheSizeMB   int
-	Volume                int
-	EqualizerEnabled      bool
-	EqualizerType         string    // "ISO10Band" or "ISO15Band"
-	EqualizerPreamp       float64
-	GraphicEqualizerBands []float64
-	ActiveEQPresetName    string // Name of currently selected EQ preset
-	AutoEQProfilePath     string // Path to applied AutoEQ profile (e.g., "oratory1990/over-ear/Sennheiser HD 650")
-	AutoEQProfileName     string // Display name of applied profile (e.g., "Sennheiser HD 650")
-	PauseFade             bool
+	AudioDeviceName     string
+	AudioExclusive      bool
+	InMemoryCacheSizeMB int
+	Volume              int
+	PauseFade           bool
 }
 
 type ScrobbleConfig struct {
@@ -170,11 +162,6 @@ type TranscodingConfig struct {
 	MaxBitRateKBPS   int
 }
 
-type PeakMeterConfig struct {
-	WindowHeight int
-	WindowWidth  int
-}
-
 type Config struct {
 	Application      AppConfig
 	Servers          []*ServerConfig
@@ -188,13 +175,12 @@ type Config struct {
 	PlaylistsPage    PlaylistsPageConfig
 	TracksPage       TracksPageConfig
 	NowPlayingConfig NowPlayingPageConfig
-	Playback         PlaybackConfig
-	LocalPlayback    LocalPlaybackConfig
-	Scrobbling       ScrobbleConfig
-	ReplayGain       ReplayGainConfig
-	Transcoding      TranscodingConfig
-	Theme            ThemeConfig
-	PeakMeter        PeakMeterConfig
+	Playback    PlaybackConfig
+	LocalPlayback LocalPlaybackConfig
+	Scrobbling    ScrobbleConfig
+	ReplayGain    ReplayGainConfig
+	Transcoding   TranscodingConfig
+	Theme         ThemeConfig
 }
 
 var SupportedStartupPages = []string{"Albums", "Favorites", "Playlists", "Artists", "All Tracks"}
@@ -263,22 +249,17 @@ func DefaultConfig(appVersionTag string) *Config {
 			TracklistColumns: []string{"Album", "Time", "Plays"},
 		},
 		Playback: PlaybackConfig{
-			Autoplay:           false,
-			Shuffle:            false,
-			RepeatMode:         "None",
-			UseWaveformSeekbar: false,
+			Autoplay:   false,
+			Shuffle:    false,
+			RepeatMode: "None",
 		},
 		LocalPlayback: LocalPlaybackConfig{
 			// "auto" is the name to pass to MPV for autoselecting the output device
-			AudioDeviceName:       "auto",
-			AudioExclusive:        false,
-			InMemoryCacheSizeMB:   30,
-			Volume:                100,
-			EqualizerEnabled:      false,
-			EqualizerType:         "ISO15Band",
-			EqualizerPreamp:       0,
-			GraphicEqualizerBands: make([]float64, 15),
-			PauseFade:             true,
+			AudioDeviceName:     "auto",
+			AudioExclusive:      false,
+			InMemoryCacheSizeMB: 30,
+			Volume:              100,
+			PauseFade:           true,
 		},
 		Scrobbling: ScrobbleConfig{
 			Enabled:              true,
@@ -299,10 +280,6 @@ func DefaultConfig(appVersionTag string) *Config {
 		Theme: ThemeConfig{
 			Appearance:             "Dark",
 			UseRoundedImageCorners: true,
-		},
-		PeakMeter: PeakMeterConfig{
-			WindowWidth:  375,
-			WindowHeight: 100,
 		},
 	}
 }

@@ -57,7 +57,6 @@ func (m *Controller) connectTracklistActionsWithReplayGainMode(tracklist *widget
 	tracklist.OnColumnVisibilityMenuShown = func(pop *widget.PopUp) {
 		m.ClosePopUpOnEscape(pop)
 	}
-	tracklist.OnDownload = m.ShowDownloadDialog
 	tracklist.OnShare = func(trackID string) {
 		m.ShowShareDialog(trackID)
 	}
@@ -100,7 +99,6 @@ func (m *Controller) ConnectAlbumGridActions(grid *widgets.GridView) {
 		m.NavigateTo(ArtistRoute(artistID))
 	}
 	grid.OnAddToPlaylist = m.onAddAlbumToPlaylist
-	grid.OnDownload = m.onDownloadAlbum
 	grid.OnShare = func(albumID string) {
 		m.ShowShareDialog(albumID)
 	}
@@ -128,7 +126,6 @@ func (m *Controller) ConnectGroupedReleasesActions(grid *widgets.GroupedReleases
 		m.NavigateTo(ArtistRoute(artistID))
 	}
 	grid.OnAddToPlaylist = m.onAddAlbumToPlaylist
-	grid.OnDownload = m.onDownloadAlbum
 	grid.OnShare = func(albumID string) {
 		m.ShowShareDialog(albumID)
 	}
@@ -143,19 +140,6 @@ func (m *Controller) onAddAlbumToPlaylist(albumID string) {
 		}
 		fyne.Do(func() {
 			m.DoAddTracksToPlaylistWorkflow(sharedutil.TracksToIDs(album.Tracks))
-		})
-	}()
-}
-
-func (m *Controller) onDownloadAlbum(albumID string) {
-	go func() {
-		album, err := m.App.ServerManager.Server.GetAlbum(albumID)
-		if err != nil {
-			log.Printf("error loading album: %s", err.Error())
-			return
-		}
-		fyne.Do(func() {
-			m.ShowDownloadDialog(album.Tracks, album.Name)
 		})
 	}()
 }
@@ -178,19 +162,6 @@ func (m *Controller) ConnectArtistGridActions(grid *widgets.GridView) {
 			ArtistIDs: []string{artistID},
 		}, favorite)
 	}
-	grid.OnDownload = func(artistID string) {
-		go func() {
-			tracks := m.GetArtistTracks(artistID)
-			tist, err := m.App.ServerManager.Server.GetArtist(artistID)
-			if err != nil {
-				log.Printf("error getting artist: %v", err.Error())
-				return
-			}
-			fyne.Do(func() {
-				m.ShowDownloadDialog(tracks, tist.Name)
-			})
-		}()
-	}
 	grid.OnShare = func(artistID string) {
 		m.ShowShareDialog(artistID)
 	}
@@ -201,7 +172,6 @@ func (c *Controller) ConnectPlayQueuelistActions(list *widgets.PlayQueueList) {
 		newTracks := sharedutil.ReorderItems(list.Items(), idxs, insertPos)
 		c.App.PlaybackManager.UpdatePlayQueue(newTracks)
 	}
-	list.OnDownload = c.ShowDownloadDialog
 	list.OnShowTrackInfo = c.ShowTrackInfoDialog
 	list.OnShare = func(tracks []*mediaprovider.Track) {
 		if len(tracks) > 0 {

@@ -280,10 +280,6 @@ func NewAlbumPageHeader(page *AlbumPage) *AlbumPageHeader {
 					sharedutil.TracksToIDs(a.page.tracks))
 			})
 			playlist.Icon = myTheme.PlaylistIcon
-			download := fyne.NewMenuItem(lang.L("Download")+"...", func() {
-				a.page.contr.ShowDownloadDialog(a.page.tracks, a.titleLabel.String())
-			})
-			download.Icon = theme.DownloadIcon()
 			info := fyne.NewMenuItem(lang.L("Show info")+"...", func() {
 				a.page.contr.ShowAlbumInfoDialog(a.albumID, a.titleLabel.String(), a.cover.Image())
 			})
@@ -292,7 +288,7 @@ func NewAlbumPageHeader(page *AlbumPage) *AlbumPageHeader {
 				a.page.contr.ShowShareDialog(a.albumID)
 			})
 			a.shareMenuItem.Icon = myTheme.ShareIcon
-			menu := fyne.NewMenu("", playNext, queue, playlist, download, info, a.shareMenuItem)
+			menu := fyne.NewMenu("", playNext, queue, playlist, info, a.shareMenuItem)
 			pop = widget.NewPopUpMenu(menu, fyne.CurrentApp().Driver().CanvasForObject(a))
 		}
 		_, canShare := page.mp.(mediaprovider.SupportsSharing)

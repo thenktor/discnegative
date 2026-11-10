@@ -8,15 +8,11 @@ import (
 	"math/rand"
 	"runtime"
 	"slices"
-	"sync"
 	"time"
 
 	"github.com/charlievieth/strcase"
-	"github.com/supersonic-app/go-upnpcast/device"
-	"github.com/supersonic-app/go-upnpcast/services"
 	"github.com/supersonic-app/supersonic/backend/mediaprovider"
 	"github.com/supersonic-app/supersonic/backend/player"
-	"github.com/supersonic-app/supersonic/backend/player/dlna"
 	"github.com/supersonic-app/supersonic/backend/player/mpv"
 	"github.com/supersonic-app/supersonic/sharedutil"
 )
@@ -25,30 +21,22 @@ import (
 // intermediary between the frontend and various Player backends.
 type PlaybackManager struct {
 	engine   *playbackEngine
-	wfmGen   *WaveformImageGenerator
 	cache    *AudioCache
 	cmdQueue *playbackCommandQueue
 	appCfg   *AppConfig
 	cfg      *PlaybackConfig
 
 	// CoverArtPathFn returns a local filesystem path to the cached cover
-	// art image for the given CoverArtID. Used by DLNA cast so the
-	// renderer can fetch album art via the local proxy. Set externally
+	// art image for the given CoverArtID. Set externally
 	// (typically wired to ImageManager.GetCoverArtPath).
 	CoverArtPathFn func(coverArtID string) (string, error)
 
-	localPlayer         player.BasePlayer
-	remotePlayersLock   sync.Mutex
-	remotePlayers       []RemotePlaybackDevice
-	currentRemotePlayer *RemotePlaybackDevice
+	localPlayer player.BasePlayer
 
-	onWaveformImgUpdate []func(*WaveformImage)
-	onPlayerChange      []func()
+	onPlayerChange []func()
 
-	lastPlayTime         float64
-	lastPlayingID        string
-	wfmUpdateImageCancel context.CancelFunc
-	wfmImageJobs         [3]*WaveformImageJob
+	lastPlayTime  float64
+	lastPlayingID string
 
 	// whether autoplay tracks are currently being fetched/enqueued
 	pendingAutoplay    bool
@@ -58,13 +46,6 @@ type PlaybackManager struct {
 	radioStationName string
 	radioIcyTitle    string
 	radioIcyArtist   string
-}
-
-type RemotePlaybackDevice struct {
-	Name     string
-	URL      string
-	Protocol string
-	new      func() (player.BasePlayer, error)
 }
 
 func NewPlaybackManager(
@@ -87,28 +68,9 @@ func NewPlaybackManager(
 		localPlayer: p,
 		cache:       c,
 	}
-	if c != nil {
-		pm.wfmGen = NewWaveformImageGenerator(c)
-	}
 	pm.addOnTrackChangeHook()
 	go pm.runCmdQueue(ctx)
 	return pm
-}
-
-func (p *PlaybackManager) findWfmImageJob(id string, uncanceledOnly bool) (*WaveformImageJob, bool) {
-	for _, j := range p.wfmImageJobs {
-		if j != nil && j.ItemID == id && (!uncanceledOnly || !j.Canceled()) {
-			return j, true
-		}
-	}
-	return nil, false
-}
-
-func (p *PlaybackManager) addWfmImageJob(job *WaveformImageJob) {
-	p.wfmImageJobs[0].Cancel()
-	p.wfmImageJobs[0] = p.wfmImageJobs[1]
-	p.wfmImageJobs[1] = p.wfmImageJobs[2]
-	p.wfmImageJobs[2] = job
 }
 
 func (p *PlaybackManager) addOnTrackChangeHook() {
@@ -126,34 +88,11 @@ func (p *PlaybackManager) addOnTrackChangeHook() {
 		}
 	})
 
-	p.engine.onBeforeSongChange = append(p.engine.onBeforeSongChange, func(item mediaprovider.MediaItem) {
-		if item == nil || !p.engine.playbackCfg.UseWaveformSeekbar {
-			return
-		}
-		if p.wfmGen != nil && item.Metadata().Type == mediaprovider.MediaItemTypeTrack {
-			if _, ok := p.findWfmImageJob(item.Metadata().ID, true); !ok {
-				// start generating waveform image for next-up track
-				p.addWfmImageJob(p.wfmGen.StartWaveformGeneration(item.(*mediaprovider.Track)))
-			}
-		}
-	})
-	p.engine.onLoadTrackPaused = append(p.engine.onLoadTrackPaused, func(item mediaprovider.MediaItem) {
-		if item == nil || !p.engine.playbackCfg.UseWaveformSeekbar {
-			return
-		}
-		// we need to call handleWaveformImageSongChange here to ensure the waveform image is updated
-		// for the track that is loaded paused when starting the app
-		p.handleWaveformImageSongChange(item)
-		p.wasLoadTrackPaused = true
-	})
+
 
 	p.OnSongChange(func(item mediaprovider.MediaItem, _ *mediaprovider.Track) {
 		if p.wasLoadTrackPaused {
-			// if the song change was triggered by LoadTrackPaused when starting the app,
-			// we already called handleWaveformImageSongChange in the onBeforeSongChange hook above
 			p.wasLoadTrackPaused = false
-		} else {
-			p.handleWaveformImageSongChange(item)
 		}
 
 		if runtime.GOOS != "windows" {
@@ -178,154 +117,12 @@ func (p *PlaybackManager) addOnTrackChangeHook() {
 	})
 }
 
-func (p *PlaybackManager) handleWaveformImageSongChange(item mediaprovider.MediaItem) {
-	if p.wfmUpdateImageCancel != nil {
-		p.wfmUpdateImageCancel()
-	}
-	if !p.engine.playbackCfg.UseWaveformSeekbar {
-		return
-	}
-
-	updateUnfinishedJob := func(job *WaveformImageJob) {
-		ctx, c := context.WithCancel(p.cache.rootCtx)
-		p.wfmUpdateImageCancel = c
-		go func(ctx context.Context, job *WaveformImageJob) {
-			for {
-				time.Sleep(333 * time.Millisecond)
-				select {
-				case <-ctx.Done():
-					return
-				default:
-					img := job.Get()
-					for _, cb := range p.onWaveformImgUpdate {
-						cb(img)
-					}
-					if job.Done() {
-						return
-					}
-				}
-			}
-		}(ctx, job)
-	}
-
-	if item != nil {
-		// cancel possible waveform generation job for previous track
-		if p.lastPlayingID != item.Metadata().ID {
-			if old, ok := p.findWfmImageJob(p.lastPlayingID, false); ok {
-				old.Cancel()
-			}
-			p.lastPlayingID = item.Metadata().ID
-		}
-
-		var job *WaveformImageJob
-		if j, ok := p.findWfmImageJob(item.Metadata().ID, true); ok {
-			job = j
-		} else if tr, ok := item.(*mediaprovider.Track); ok {
-			job = p.wfmGen.StartWaveformGeneration(tr)
-			p.addWfmImageJob(job)
-		}
-		if job != nil {
-			img := job.Get()
-			for _, cb := range p.onWaveformImgUpdate {
-				cb(img)
-			}
-			if !job.done && job != nil {
-				updateUnfinishedJob(job)
-			}
-		}
-	}
-
-	if item == nil || item.Metadata().Type != mediaprovider.MediaItemTypeTrack {
-		// set a zero waveform image when we're not playing anything
-		// or playing a media type we can't derive a waveform from (e.g. radio)
-		img := NewWaveformImage()
-		for _, cb := range p.onWaveformImgUpdate {
-			cb(img)
-		}
-	}
-}
-
-func (p *PlaybackManager) ScanRemotePlayers(ctx context.Context, fastScan bool) {
-	if fastScan {
-		p.scanRemotePlayers(ctx, 1 /*waitSec*/)
-		// continue to slow scan to detect players that take longer to respond
-	}
-	p.scanRemotePlayers(ctx, 10 /*waitSec*/)
-}
-
-func (p *PlaybackManager) scanRemotePlayers(ctx context.Context, waitSec int) {
-	devices, _ := device.SearchMediaRenderers(ctx, waitSec, services.AVTransport, services.RenderingControl)
-
-	coverArtPathFn := p.CoverArtPathFn
-	var discovered []RemotePlaybackDevice
-	for _, d := range devices {
-		rp := RemotePlaybackDevice{
-			Name:     d.FriendlyName,
-			URL:      d.URL,
-			Protocol: "DLNA",
-			new: func() (player.BasePlayer, error) {
-				return dlna.NewDLNAPlayer(d, coverArtPathFn)
-			},
-		}
-		discovered = append(discovered, rp)
-	}
-
-	p.remotePlayersLock.Lock()
-	p.remotePlayers = discovered
-	p.remotePlayersLock.Unlock()
-}
-
-func (p *PlaybackManager) RemotePlayers() []RemotePlaybackDevice {
-	p.remotePlayersLock.Lock()
-	players := p.remotePlayers
-	p.remotePlayersLock.Unlock()
-	return players
-}
-
-func (p *PlaybackManager) CurrentRemotePlayer() *RemotePlaybackDevice {
-	return p.currentRemotePlayer
-}
-
-func (p *PlaybackManager) SetRemotePlayer(rp *RemotePlaybackDevice) error {
-	// Even in case of failure, call onPlayerChange callbacks to update UI
-	// (such as enabling/disabling cast button)
-	defer func() {
-		for _, cb := range p.onPlayerChange {
-			cb()
-		}
-	}()
-
-	p.cmdQueue.Clear()
-	if rp == nil {
-		if err := p.engine.SetPlayer(p.localPlayer); err != nil {
-			return err
-		}
-		p.currentRemotePlayer = nil
-		return nil
-	}
-
-	player, err := rp.new()
-	if err != nil {
-		return err
-	}
-	if err := p.engine.SetPlayer(player); err != nil {
-		return err
-	}
-
-	p.currentRemotePlayer = rp
-	return nil
-}
-
 func (p *PlaybackManager) CurrentPlayer() player.BasePlayer {
 	return p.engine.CurrentPlayer()
 }
 
 func (p *PlaybackManager) OnPlayerChange(cb func()) {
 	p.onPlayerChange = append(p.onPlayerChange, cb)
-}
-
-func (p *PlaybackManager) OnWaveformImgUpdate(cb func(*WaveformImage)) {
-	p.onWaveformImgUpdate = append(p.onWaveformImgUpdate, cb)
 }
 
 func (p *PlaybackManager) IsSeeking() bool {
@@ -770,9 +567,6 @@ func (p *PlaybackManager) Stop() {
 
 func (p *PlaybackManager) Shutdown() {
 	p.cmdQueue.StopAndWait()
-	if p.wfmGen != nil {
-		p.wfmGen.Close()
-	}
 }
 
 func (p *PlaybackManager) Pause() {

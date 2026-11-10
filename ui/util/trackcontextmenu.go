@@ -17,7 +17,6 @@ type TrackContextMenu struct {
 	OnPlay          func(shuffle bool)
 	OnAddToQueue    func(next bool)
 	OnPlaySongRadio func()
-	OnDownload      func()
 	OnAddToPlaylist func()
 	OnShowInfo      func()
 	OnShare         func()
@@ -71,12 +70,6 @@ func NewTrackContextMenu(disablePlaybackMenu bool, auxItems []*fyne.MenuItem) *T
 		}
 	})
 	playlist.Icon = myTheme.PlaylistIcon
-	download := fyne.NewMenuItem(lang.L("Download")+"...", func() {
-		if tcm.OnDownload != nil {
-			tcm.OnDownload()
-		}
-	})
-	download.Icon = theme.DownloadIcon()
 	tcm.infoMenuItem = fyne.NewMenuItem(lang.L("Show info")+"...", func() {
 		if tcm.OnShowInfo != nil {
 			tcm.OnShowInfo()
@@ -96,7 +89,7 @@ func NewTrackContextMenu(disablePlaybackMenu bool, auxItems []*fyne.MenuItem) *T
 	})
 	unfavorite.Icon = myTheme.NotFavoriteIcon
 	tcm.menu.Items = append(tcm.menu.Items, fyne.NewMenuItemSeparator(),
-		playlist, download, tcm.infoMenuItem)
+		playlist, tcm.infoMenuItem)
 	tcm.shareMenuItem = fyne.NewMenuItem(lang.L("Share")+"...", func() {
 		if tcm.OnShare != nil {
 			tcm.OnShare()

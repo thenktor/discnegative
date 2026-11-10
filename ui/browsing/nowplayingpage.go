@@ -152,7 +152,6 @@ func NewNowPlayingPage(
 		}
 	}
 
-	a.relatedList.OnDownload = a.queueList.OnDownload
 	a.relatedList.OnShare = a.queueList.OnShare
 	a.relatedList.OnAddToPlaylist = a.queueList.OnAddToPlaylist
 	a.relatedList.OnShowArtistPage = a.queueList.OnShowArtistPage

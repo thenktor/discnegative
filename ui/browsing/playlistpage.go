@@ -426,11 +426,7 @@ func NewPlaylistPageHeader(page *PlaylistPage) *PlaylistPageHeader {
 					sharedutil.TracksToIDs(a.page.tracks))
 			})
 			playlist.Icon = myTheme.PlaylistIcon
-			download := fyne.NewMenuItem(lang.L("Download")+"...", func() {
-				a.page.contr.ShowDownloadDialog(a.page.tracks, a.titleLabel.String())
-			})
-			download.Icon = theme.DownloadIcon()
-			menu := fyne.NewMenu("", playNext, queue, playlist, download)
+			menu := fyne.NewMenu("", playNext, queue, playlist)
 			pop = widget.NewPopUpMenu(menu, fyne.CurrentApp().Driver().CanvasForObject(a))
 		}
 		pos := fyne.CurrentApp().Driver().AbsolutePositionForObject(menuBtn)

@@ -24,8 +24,6 @@ type AuxControls struct {
 
 	VolumeControl *VolumeControl
 	autoplay      *IconButton
-	cast          *IconButton
-	showQueue     *IconButton
 
 	container *fyne.Container
 }
@@ -34,12 +32,7 @@ func NewAuxControls(initialVolume int, initialAutoplay bool) *AuxControls {
 	a := &AuxControls{
 		VolumeControl: NewVolumeControl(initialVolume),
 		autoplay:      NewIconButton(myTheme.AutoplayIcon, nil),
-		cast:          NewIconButton(myTheme.CastIcon, nil),
-		showQueue:     NewIconButton(myTheme.PlayQueueIcon, nil),
 	}
-
-	a.cast.IconSize = IconButtonSizeSmaller
-	a.cast.SetToolTip(lang.L("Cast to device"))
 
 	a.autoplay.Highlighted = initialAutoplay
 	// a.autoplay.IconSize = IconButtonSizeSmaller
@@ -51,9 +44,6 @@ func NewAuxControls(initialVolume int, initialAutoplay bool) *AuxControls {
 		}
 	}
 
-	a.showQueue.IconSize = IconButtonSizeSmaller
-	a.showQueue.SetToolTip(lang.L("Show play queue"))
-
 	a.container = container.NewHBox(
 		layout.NewSpacer(),
 		container.NewVBox(
@@ -61,7 +51,7 @@ func NewAuxControls(initialVolume int, initialAutoplay bool) *AuxControls {
 			a.VolumeControl,
 			container.New(
 				layout.NewCustomPaddedHBoxLayout(theme.Padding()*1.5),
-				layout.NewSpacer(), a.autoplay, a.cast, a.showQueue, util.NewHSpace(5)),
+				layout.NewSpacer(), a.autoplay, util.NewHSpace(5)),
 			layout.NewSpacer(),
 		),
 	)
@@ -73,16 +63,6 @@ func (a *AuxControls) CreateRenderer() fyne.WidgetRenderer {
 	return widget.NewSimpleRenderer(a.container)
 }
 
-func (a *AuxControls) DisableCastButton() {
-	a.cast.Disable()
-}
-
-func (a *AuxControls) SetIsRemotePlayer(isRemote bool) {
-	a.cast.Enable()
-	a.cast.Highlighted = isRemote
-	a.cast.Refresh()
-}
-
 func (a *AuxControls) SetAutoplay(autoplay bool) {
 	if autoplay == a.autoplay.Highlighted {
 		return
@@ -91,15 +71,7 @@ func (a *AuxControls) SetAutoplay(autoplay bool) {
 	a.autoplay.Refresh()
 }
 
-func (a *AuxControls) OnShowPlayQueue(f func()) {
-	a.showQueue.OnTapped = f
-}
 
-func (a *AuxControls) OnShowCastMenu(f func(func())) {
-	a.cast.OnTapped = func() {
-		f(a.DisableCastButton)
-	}
-}
 
 type volumeSlider struct {
 	widget.Slider
@@ -168,8 +140,8 @@ func NewVolumeControl(initialVol int) *VolumeControl {
 	v.slider.Value = float64(v.lastVol)
 	v.slider.OnChanged = v.onChanged
 
-	// for players that are slow to respond to volume changes
-	// (e.g. DLNA), delay responding to the SetVolume call
+	// for players that are slow to respond to volume changes,
+	// delay responding to the SetVolume call
 	// to avoid hiccuping from callback "echoes"
 	v.setVolDebouncer = util.NewDebouncer(100*time.Millisecond, func() {
 		v.delaySetVolume = false

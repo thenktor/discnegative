@@ -22,7 +22,6 @@ type QuickSearch struct {
 	OnAddToPlaylist func(t mediaprovider.ContentType, id string, item any)
 	OnSetFavorite   func(trackID string, fav bool)
 	OnSetRating     func(trackID string, rating int)
-	OnDownload      func(track *mediaprovider.Track)
 	OnShare         func(trackID string)
 	OnPlaySongRadio func(track *mediaprovider.Track)
 	OnShowTrackInfo func(track *mediaprovider.Track)
@@ -65,9 +64,6 @@ func (q *QuickSearch) showMenu(idx int, pos fyne.Position) {
 		}
 		menu.OnAddToPlaylist = func() {
 			q.OnAddToPlaylist(cType, id, item)
-		}
-		menu.OnDownload = func() {
-			q.OnDownload(item.(*mediaprovider.Track))
 		}
 		menu.OnFavorite = func(fav bool) {
 			q.OnSetFavorite(id, fav)

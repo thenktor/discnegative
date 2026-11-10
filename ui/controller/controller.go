@@ -1,17 +1,11 @@
 package controller
 
 import (
-	"archive/zip"
 	"errors"
 	"fmt"
 	"image"
-	"image/color"
-	"io"
 	"log"
-	"os"
-	"path/filepath"
 	"runtime"
-	"time"
 
 	fynetooltip "github.com/dweymouth/fyne-tooltip"
 	"github.com/supersonic-app/supersonic/backend"
@@ -29,7 +23,6 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/driver"
 	"fyne.io/fyne/v2/lang"
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -44,7 +37,6 @@ type ToastProvider interface {
 }
 
 type Controller struct {
-	visualizationData
 	AppVersion string
 	App        *backend.App
 	MainWindow fyne.Window
@@ -58,10 +50,6 @@ type Controller struct {
 	UnselectAllPageFunc func()
 	ToastProvider       ToastProvider
 
-	popUpQueue         *widget.PopUp
-	popUpQueueList     *widgets.PlayQueueList
-	pauseAfterCurrent  *widget.Check
-	popUpQueueLastUsed int64
 	escapablePopUp     fyne.CanvasObject
 	haveModal          bool
 	runOnModalClosed   func()
@@ -73,43 +61,17 @@ func New(app *backend.App, appVersion string, mainWindow fyne.Window) *Controlle
 		MainWindow: mainWindow,
 		App:        app,
 	}
-	c.initVisualizations()
-	c.App.PlaybackManager.OnQueueChange(util.FyneDoFunc(func() {
-		if c.popUpQueue != nil {
-			c.popUpQueueList.SetItems(c.App.PlaybackManager.GetActivePlayQueue())
-		}
-	}))
-	c.App.PlaybackManager.OnSongChange(func(track mediaprovider.MediaItem, _ *mediaprovider.Track) {
-		fyne.Do(func() {
-			if c.popUpQueue == nil {
-				return
-			}
-			if track == nil {
-				c.popUpQueueList.SetNowPlaying("")
-			} else {
-				c.popUpQueueList.SetNowPlaying(track.Metadata().ID)
-			}
-		})
-	})
 	return c
 }
 
 func (m *Controller) SelectAll() {
-	if m.popUpQueue != nil && m.popUpQueue.Visible() {
-		m.popUpQueueList.SelectAll()
-		return
-	}
 	if m.SelectAllPageFunc != nil {
 		m.SelectAllPageFunc()
 	}
 }
 
 func (m *Controller) UnselectAll() {
-	if m.popUpQueue != nil && m.popUpQueue.Visible() {
-		m.popUpQueueList.UnselectAll()
-		return
-	}
-	if m.SelectAllPageFunc != nil {
+	if m.UnselectAllPageFunc != nil {
 		m.UnselectAllPageFunc()
 	}
 }
@@ -143,129 +105,6 @@ func (m *Controller) QueueShowModalFunc(f func()) {
 
 func (m *Controller) HaveModal() bool {
 	return m.haveModal
-}
-
-func (m *Controller) ShowCastMenu(onPendingPlayerChange func()) {
-	rp := m.App.PlaybackManager.CurrentRemotePlayer()
-	devices := m.App.PlaybackManager.RemotePlayers()
-	local := fyne.NewMenuItem(lang.L("This computer"), func() {
-		if rp == nil {
-			return // no-op. already not casting
-		}
-		onPendingPlayerChange()
-		go func() {
-			if err := m.App.PlaybackManager.SetRemotePlayer(nil); err != nil {
-				fyne.Do(func() { m.ToastProvider.ShowErrorToast("Failed to disconnect from remote player") })
-			}
-		}()
-	})
-	local.Icon = theme.ComputerIcon()
-	local.Checked = rp == nil
-
-	menu := fyne.NewMenu("", local)
-	for _, d := range devices {
-		_d := d
-		isCurrent := rp != nil && _d.URL == rp.URL
-		item := fyne.NewMenuItem(d.Name, func() {
-			if isCurrent {
-				return // no-op.
-			}
-			onPendingPlayerChange()
-			go func() {
-				if err := m.App.PlaybackManager.SetRemotePlayer(&_d); err != nil {
-					fyne.Do(func() { m.ToastProvider.ShowErrorToast("Failed to connect to " + _d.Name) })
-				}
-			}()
-		})
-		item.Icon = myTheme.CastIcon
-		item.Checked = isCurrent
-		menu.Items = append(menu.Items, item)
-	}
-	pop := widget.NewPopUpMenu(menu, m.MainWindow.Canvas())
-	canvasSize := m.MainWindow.Canvas().Size()
-	pop.ShowAtPosition(fyne.NewPos(
-		canvasSize.Width-pop.MinSize().Width-10,
-		canvasSize.Height-pop.MinSize().Height-100,
-	))
-}
-
-func (m *Controller) ShowPopUpPlayQueue() {
-	if m.popUpQueue == nil {
-		m.popUpQueueList = widgets.NewPlayQueueList(m.App.ImageManager, false)
-		m.popUpQueueList.Reorderable = true
-		m.popUpQueueList.SetItems(m.App.PlaybackManager.GetActivePlayQueue())
-		m.ConnectPlayQueuelistActions(m.popUpQueueList)
-
-		title := widget.NewRichTextWithText(lang.L("Play Queue"))
-		title.Segments[0].(*widget.TextSegment).Style.Alignment = fyne.TextAlignCenter
-		title.Segments[0].(*widget.TextSegment).Style.TextStyle.Bold = true
-		m.pauseAfterCurrent = widget.NewCheck(lang.L("Pause after current track"), func(b bool) {
-			m.App.PlaybackManager.SetPauseAfterCurrent(b)
-		})
-		bottomRow := container.NewHBox(layout.NewSpacer(), m.pauseAfterCurrent)
-		ctr := container.NewBorder(title, bottomRow, nil, nil,
-			container.NewPadded(m.popUpQueueList),
-		)
-		m.popUpQueue = widget.NewPopUp(ctr, m.MainWindow.Canvas())
-		fynetooltip.AddPopUpToolTipLayer(m.popUpQueue)
-
-		container.NewThemeOverride(m.popUpQueue, myTheme.WithColorTransformOverride(
-			theme.ColorNameOverlayBackground,
-			func(c color.Color) color.Color {
-				if nrgba, ok := c.(color.NRGBA); ok {
-					nrgba.A = 245
-					return nrgba
-				}
-				c_ := c.(color.RGBA)
-				c_.A = 245
-				return c_
-			},
-		))
-
-		// free popUpQueue if it hasn't been used in awhile
-		go func() {
-			t := time.NewTicker(1 * time.Minute)
-			for range t.C {
-				fyne.Do(func() {
-					now := time.Now().UnixMilli()
-					if m.popUpQueueLastUsed < now-120_000 /*2 min*/ {
-						fynetooltip.DestroyPopUpToolTipLayer(m.popUpQueue)
-						m.popUpQueue = nil
-						m.popUpQueueList = nil
-						m.pauseAfterCurrent = nil
-						m.popUpQueueLastUsed = 0
-						t.Stop()
-						return
-					}
-				})
-			}
-		}()
-	}
-	m.popUpQueueLastUsed = time.Now().UnixMilli()
-	popUpQueueList := m.popUpQueueList
-	pop := m.popUpQueue
-
-	npID := ""
-	if np := m.App.PlaybackManager.NowPlaying(); np != nil {
-		npID = np.Metadata().ID
-	}
-	popUpQueueList.SetNowPlaying(npID)
-	popUpQueueList.UnselectAll()
-
-	m.ClosePopUpOnEscape(pop)
-	minSize := fyne.NewSize(300, 400)
-	maxSize := fyne.NewSize(800, 1000)
-	canvasSize := m.MainWindow.Canvas().Size()
-	size := minSize.Max(maxSize.Min(
-		fyne.NewSize(canvasSize.Width*0.4, canvasSize.Height*0.5),
-	))
-	pop.Resize(size)
-	popUpQueueList.ScrollToNowPlaying() // must come after resize
-	m.pauseAfterCurrent.SetChecked(m.App.PlaybackManager.IsPauseAfterCurrent())
-	pop.ShowAtPosition(fyne.NewPos(
-		canvasSize.Width-size.Width-10,
-		canvasSize.Height-size.Height-100,
-	))
 }
 
 func (m *Controller) ShowPopUpImage(img image.Image) {
@@ -319,19 +158,15 @@ func (c *Controller) ShowSettingsDialog(themeUpdateCallbk func(), themeFiles map
 
 	curPlayer := c.App.PlaybackManager.CurrentPlayer()
 	_, isReplayGainPlayer := curPlayer.(player.ReplayGainPlayer)
-	_, isEqualizerPlayer := curPlayer.(*mpv.Player)
 	_, canSavePlayQueue := c.App.ServerManager.Server.(mediaprovider.CanSavePlayQueue)
-	isLocalPlayer := isEqualizerPlayer
-	bands := c.App.LocalPlayer.Equalizer().BandFrequencies()
+	isLocalPlayer := true
 
 	dlg := dialogs.NewSettingsDialog(c.App.Config,
-		devs, themeFiles, bands,
+		devs, themeFiles,
 		c.App.ServerManager.Server.ClientDecidesScrobble(),
-		isLocalPlayer, isReplayGainPlayer, isEqualizerPlayer, canSavePlayQueue,
-		c.App.EQPresetManager,
-		c.MainWindow,
-		c.App.AutoEQManager,
+		isLocalPlayer, isReplayGainPlayer, canSavePlayQueue,
 		c.App.ImageManager,
+		c.MainWindow,
 		c.ToastProvider)
 	dlg.OnReplayGainSettingsChanged = func() {
 		c.App.PlaybackManager.SetReplayGainOptions(c.App.Config.ReplayGain)
@@ -346,34 +181,6 @@ func (c *Controller) ShowSettingsDialog(themeUpdateCallbk func(), themeFiles map
 		c.App.LocalPlayer.SetAudioDevice(c.App.Config.LocalPlayback.AudioDeviceName)
 	}
 	dlg.OnThemeSettingChanged = themeUpdateCallbk
-	dlg.OnEqualizerSettingsChanged = func() {
-		// Create the appropriate equalizer type based on config
-		var eq mpv.Equalizer
-		if c.App.Config.LocalPlayback.EqualizerType == "ISO10Band" {
-			eq10 := &mpv.ISO10BandEqualizer{
-				Disabled: !c.App.Config.LocalPlayback.EqualizerEnabled,
-				EQPreamp: c.App.Config.LocalPlayback.EqualizerPreamp,
-			}
-			// Copy up to 10 bands
-			numBands := min(len(c.App.Config.LocalPlayback.GraphicEqualizerBands), 10)
-			for i := 0; i < numBands; i++ {
-				eq10.BandGains[i] = c.App.Config.LocalPlayback.GraphicEqualizerBands[i]
-			}
-			eq = eq10
-		} else {
-			eq15 := &mpv.ISO15BandEqualizer{
-				Disabled: !c.App.Config.LocalPlayback.EqualizerEnabled,
-				EQPreamp: c.App.Config.LocalPlayback.EqualizerPreamp,
-			}
-			// Copy up to 15 bands
-			numBands := min(len(c.App.Config.LocalPlayback.GraphicEqualizerBands), 15)
-			for i := 0; i < numBands; i++ {
-				eq15.BandGains[i] = c.App.Config.LocalPlayback.GraphicEqualizerBands[i]
-			}
-			eq = eq15
-		}
-		c.App.LocalPlayer.SetEqualizer(eq)
-	}
 	dlg.OnPageNeedsRefresh = c.RefreshPageFunc
 	dlg.OnClearCaches = func() { go c.App.ClearCaches() }
 	pop := widget.NewModalPopUp(container.NewPadded(dlg), c.MainWindow.Canvas())
@@ -477,102 +284,6 @@ func (c *Controller) ShowShareDialog(id string) {
 			dlg.Show()
 		})
 	}()
-}
-
-func (c *Controller) ShowDownloadDialog(tracks []*mediaprovider.Track, downloadName string) {
-	numTracks := len(tracks)
-	var fileName string
-	if numTracks == 1 {
-		fileName = filepath.Base(tracks[0].FilePath)
-	} else {
-		fileName = "downloaded_tracks.zip"
-	}
-
-	dg := dialog.NewFileSave(
-		func(file fyne.URIWriteCloser, err error) {
-			if err != nil {
-				log.Println(err)
-				return
-			}
-
-			if file == nil {
-				return
-			}
-			if numTracks == 1 {
-				go c.downloadTrack(tracks[0], file.URI().Path())
-			} else {
-				go c.downloadTracks(tracks, file.URI().Path(), downloadName)
-			}
-		},
-		c.MainWindow)
-	dg.SetFileName(fileName)
-	dg.Show()
-}
-
-func (c *Controller) downloadTrack(track *mediaprovider.Track, filePath string) {
-	reader, err := c.App.ServerManager.Server.DownloadTrack(track.ID)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	file, err := os.Create(filePath)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	defer file.Close()
-
-	_, err = io.Copy(file, reader)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	log.Printf("Saved track %q to: %s\n", track.Title, filePath)
-	fyne.Do(func() {
-		c.sendNotification(fmt.Sprintf(lang.L("Download completed")+": %s", track.Title), fmt.Sprintf(lang.L("Saved at")+": %s", filePath))
-	})
-}
-
-func (c *Controller) downloadTracks(tracks []*mediaprovider.Track, filePath, downloadName string) {
-	zipFile, err := os.Create(filePath)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	defer zipFile.Close()
-
-	zipWriter := zip.NewWriter(zipFile)
-	defer zipWriter.Close()
-
-	for _, track := range tracks {
-		reader, err := c.App.ServerManager.Server.DownloadTrack(track.ID)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-
-		fileName := filepath.Base(track.FilePath)
-
-		fileWriter, err := zipWriter.Create(fileName)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-
-		_, err = io.Copy(fileWriter, reader)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-
-		log.Printf("Saved song %s to: %s\n", track.Title, filePath)
-	}
-
-	fyne.Do(func() {
-		c.sendNotification(fmt.Sprintf(lang.L("Download completed")+": %s", downloadName), fmt.Sprintf("Saved at: %s", filePath))
-	})
 }
 
 func (c *Controller) sendNotification(title, content string) {

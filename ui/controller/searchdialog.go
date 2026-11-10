@@ -63,9 +63,6 @@ func (c *Controller) ShowQuickSearch() {
 	}
 	qs.OnAddToQueue = c.handleSearchDialogOnAddToQueue
 	qs.OnAddToPlaylist = c.handleSearchDialogOnAddToPlaylist
-	qs.OnDownload = func(track *mediaprovider.Track) {
-		c.ShowDownloadDialog([]*mediaprovider.Track{track}, track.Metadata().Name)
-	}
 	qs.OnPlaySongRadio = func(track *mediaprovider.Track) {
 		go func() {
 			tracks, err := c.GetSongRadioTracks(track)

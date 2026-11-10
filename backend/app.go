@@ -51,8 +51,6 @@ type App struct {
 	LyricsManager   *LyricsManager
 	ImageManager    *ImageManager
 	AudioCache      *AudioCache
-	AutoEQManager   *AutoEQManager
-	EQPresetManager *EQPresetManager
 	PlaybackManager *PlaybackManager
 	LocalPlayer     *mpv.Player
 	UpdateChecker   UpdateChecker
@@ -152,18 +150,8 @@ func StartupApp(appName, displayAppName, appVersion, appVersionTag, latestReleas
 
 	a.ServerManager = NewServerManager(appName, appVersion, a.Config, !portableMode && a.Config.Application.EnablePasswordStorage)
 	a.ImageManager = NewImageManager(a.bgrndCtx, a.ServerManager, cacheDir)
-	if a.Config.Playback.UseWaveformSeekbar {
-		ac, err := NewAudioCache(a.bgrndCtx, a.ServerManager, filepath.Join(cacheDir, audioCacheSubdir))
-		if err != nil {
-			log.Printf("failed to create audio cache: %s", err.Error())
-		}
-		a.AudioCache = ac
-	}
 	a.PlaybackManager = NewPlaybackManager(a.bgrndCtx, a.ServerManager, a.AudioCache, a.LocalPlayer, &a.Config.Playback, &a.Config.Scrobbling, &a.Config.Transcoding, &a.Config.Application)
 	a.PlaybackManager.CoverArtPathFn = func(coverArtID string) (string, error) {
-		// Ensure the thumbnail is cached on disk, then return its path so
-		// the DLNA player can expose it through the local proxy as
-		// upnp:albumArtURI.
 		a.ImageManager.GetCoverThumbnail(coverArtID)
 		return a.ImageManager.GetCoverArtPath(coverArtID)
 	}
@@ -178,26 +166,6 @@ func StartupApp(appName, displayAppName, appVersion, appVersionTag, latestReleas
 		fetch = NewLrcLibFetcher(a.cacheDir, a.Config.Application.CustomLrcLibUrl, timeout)
 	}
 	a.LyricsManager = NewLyricsManager(a.ServerManager, fetch)
-	a.EQPresetManager = NewEQPresetManager(confDir)
-
-	// Initialize AutoEQ manager
-	autoEQTimeout := time.Duration(a.Config.Application.RequestTimeoutSeconds) * time.Second
-	a.AutoEQManager = NewAutoEQManager(filepath.Join(cacheDir, "autoeq"), autoEQTimeout)
-
-	// Periodically scan for remote players
-	go a.PlaybackManager.ScanRemotePlayers(a.bgrndCtx, true /*fastScan*/)
-	go func() {
-		t := time.NewTicker(5 * time.Minute)
-		for {
-			select {
-			case <-a.bgrndCtx.Done():
-				t.Stop()
-				return
-			case <-t.C:
-				a.PlaybackManager.ScanRemotePlayers(a.bgrndCtx, false)
-			}
-		}
-	}()
 
 	a.PlaybackManager.OnPlaying(func() {
 		SetSystemSleepDisabled(true)
@@ -424,33 +392,6 @@ func (a *App) setupMPV() error {
 	})
 	a.LocalPlayer.SetAudioExclusive(a.Config.LocalPlayback.AudioExclusive)
 	a.LocalPlayer.SetPauseFade(a.Config.LocalPlayback.PauseFade)
-
-	// Initialize the appropriate equalizer type based on config
-	var eq mpv.Equalizer
-	if a.Config.LocalPlayback.EqualizerType == "ISO10Band" {
-		eq10 := &mpv.ISO10BandEqualizer{
-			EQPreamp: a.Config.LocalPlayback.EqualizerPreamp,
-			Disabled: !a.Config.LocalPlayback.EqualizerEnabled,
-		}
-		// Copy up to 10 bands
-		numBands := min(len(a.Config.LocalPlayback.GraphicEqualizerBands), 10)
-		for i := 0; i < numBands; i++ {
-			eq10.BandGains[i] = a.Config.LocalPlayback.GraphicEqualizerBands[i]
-		}
-		eq = eq10
-	} else {
-		eq15 := &mpv.ISO15BandEqualizer{
-			EQPreamp: a.Config.LocalPlayback.EqualizerPreamp,
-			Disabled: !a.Config.LocalPlayback.EqualizerEnabled,
-		}
-		// Copy up to 15 bands
-		numBands := min(len(a.Config.LocalPlayback.GraphicEqualizerBands), 15)
-		for i := 0; i < numBands; i++ {
-			eq15.BandGains[i] = a.Config.LocalPlayback.GraphicEqualizerBands[i]
-		}
-		eq = eq15
-	}
-	a.LocalPlayer.SetEqualizer(eq)
 
 	return nil
 }

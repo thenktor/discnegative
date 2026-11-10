@@ -4,9 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -67,10 +65,8 @@ type Player struct {
 	curPlaylistPos int64
 	lenPlaylist    int64
 	prePausedState player.State
-	clientName     string
-	equalizer      Equalizer
-	peaksEnabled   bool
-	pauseFade      bool
+	clientName string
+	pauseFade    bool
 
 	icyTitleCb func(string)
 
@@ -414,15 +410,6 @@ func (p *Player) SetAudioDevice(deviceName string) error {
 	return p.mpv.SetPropertyString("audio-device", deviceName)
 }
 
-func (p *Player) SetEqualizer(eq Equalizer) error {
-	p.equalizer = eq
-	return p.setAF()
-}
-
-func (p *Player) Equalizer() Equalizer {
-	return p.equalizer
-}
-
 func (p *Player) GetMediaInfo() (MediaInfo, error) {
 	var info MediaInfo
 	n, err := p.mpv.GetProperty("audio-params", mpv.FORMAT_NODE)
@@ -484,26 +471,6 @@ func (p *Player) Destroy() {
 	}
 }
 
-func (p *Player) SetPeaksEnabled(enabled bool) error {
-	if p.peaksEnabled == enabled {
-		return nil
-	}
-	p.peaksEnabled = enabled
-	return p.setAF()
-}
-
-func (p *Player) GetPeaks() (float64, float64, float64, float64) {
-	nInf := math.Inf(-1)
-	if p.status.State != player.Playing {
-		return nInf, nInf, nInf, nInf
-	}
-	lPeak, rPeak, lRMS, rRMS, err := p.getPeaks()
-	if err != nil {
-		return nInf, nInf, nInf, nInf
-	}
-	return lPeak, rPeak, lRMS, rRMS
-}
-
 // sets the state and invokes callbacks, if triggered
 func (p *Player) setState(s player.State) {
 	switch {
@@ -518,19 +485,7 @@ func (p *Player) setState(s player.State) {
 }
 
 func (p *Player) setAF() error {
-	var filters []string
-	if p.peaksEnabled {
-		filters = append(filters, "@astats:astats=metadata=1:reset=1:measure_overall=none")
-	}
-	if eq := p.equalizer; eq != nil && eq.IsEnabled() {
-		if math.Abs(eq.Preamp()) > 0.01 {
-			filters = append(filters, fmt.Sprintf("volume=volume=%0.1fdB", eq.Preamp()))
-		}
-		if eqAF := eq.Curve().String(); eqAF != "" {
-			filters = append(filters, eqAF)
-		}
-	}
-	return p.mpv.SetPropertyString("af", strings.Join(filters, ","))
+	return p.mpv.SetPropertyString("af", "")
 }
 
 func (p *Player) eventHandler(ctx context.Context) {

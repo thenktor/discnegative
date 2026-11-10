@@ -138,11 +138,6 @@ func NewMainWindow(fyneApp fyne.App, appName, displayAppName, appVersion string,
 		fyne.NewMenuItem(lang.L("All Libraries"), func() { /* dummy - will get replaced on server login */ })))
 	m.Toolbar.AddSettingsMenuItem(lang.L("Rescan Library"), theme.ViewRefreshIcon(), func() { app.ServerManager.Server.RescanLibrary() })
 	m.Toolbar.AddSettingsMenuSeparator()
-	m.Toolbar.AddSettingsSubmenu(lang.L("Visualizations"), myTheme.VisualizationIcon,
-		fyne.NewMenu("", []*fyne.MenuItem{
-			fyne.NewMenuItem(lang.L("Peak Meter"), m.Controller.ShowPeakMeter),
-		}...))
-	m.Toolbar.AddSettingsMenuSeparator()
 	m.Toolbar.AddSettingsMenuItem(lang.L("Check for Updates"), theme.DownloadIcon(), func() {
 		go func() {
 			if t := app.UpdateChecker.CheckLatestVersionTag(); t != "" && t != app.VersionTag() {
