@@ -521,6 +521,20 @@ func (s *SettingsDialog) createAppearanceTab(window fyne.Window) *container.TabI
 		s.doChooseTTFFile(window, boldFontEntry)
 	})
 
+	monoFontEntry := widget.NewEntry()
+	monoFontEntry.SetPlaceHolder("path to .ttf or empty to use default")
+	monoFontEntry.Text = s.config.Application.FontMonoTTF
+	monoFontEntry.Validator = s.ttfPathValidator
+	monoFontEntry.OnChanged = func(path string) {
+		if monoFontEntry.Validate() == nil {
+			s.setRestartRequired()
+			s.config.Application.FontMonoTTF = path
+		}
+	}
+	monoFontBrowse := widget.NewButtonWithIcon("", theme.FolderOpenIcon(), func() {
+		s.doChooseTTFFile(window, monoFontEntry)
+	})
+
 	uiScaleLabels := []string{lang.L("Smaller"), lang.L("Normal"), lang.L("Larger")}
 	uiScaleValues := []string{"Smaller", "Normal", "Larger"}
 
@@ -583,6 +597,7 @@ func (s *SettingsDialog) createAppearanceTab(window fyne.Window) *container.TabI
 		container.New(layout.NewFormLayout(),
 			widget.NewLabel(lang.L("Normal font")), container.NewBorder(nil, nil, nil, normalFontBrowse, normalFontEntry),
 			widget.NewLabel(lang.L("Bold font")), container.NewBorder(nil, nil, nil, boldFontBrowse, boldFontEntry),
+			widget.NewLabel(lang.L("Mono font")), container.NewBorder(nil, nil, nil, monoFontBrowse, monoFontEntry),
 		),
 	))
 }

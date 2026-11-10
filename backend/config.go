@@ -65,6 +65,7 @@ type AppConfig struct {
 
 	FontNormalTTF string
 	FontBoldTTF   string
+	FontMonoTTF   string
 	UIScaleSize   string
 }
 
@@ -198,6 +199,9 @@ func DefaultConfig(appVersionTag string) *Config {
 			AllowMultiInstance:                 false,
 			MaxImageCacheSizeMB:                50,
 			UIScaleSize:                        "Normal",
+			FontNormalTTF:                      "",
+			FontBoldTTF:                        "",
+			FontMonoTTF:                        "",
 			SavePlayQueue:                      true,
 			SaveQueueToServer:                  false,
 			ShowTrackChangeNotification:        false,

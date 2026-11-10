@@ -67,6 +67,7 @@ func NewMainWindow(fyneApp fyne.App, appName, displayAppName, appVersion string,
 
 	m.theme.NormalFont = app.Config.Application.FontNormalTTF
 	m.theme.BoldFont = app.Config.Application.FontBoldTTF
+	m.theme.MonoFont = app.Config.Application.FontMonoTTF
 	fyneApp.Settings().SetTheme(m.theme)
 
 	if app.Config.Application.EnableSystemTray {

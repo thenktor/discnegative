@@ -85,11 +85,13 @@ const (
 var (
 	normalFont fyne.Resource
 	boldFont   fyne.Resource
+	monoFont   fyne.Resource
 )
 
 type MyTheme struct {
 	NormalFont   string
 	BoldFont     string
+	MonoFont     string
 	config       *backend.ThemeConfig
 	themeFileDir string
 
@@ -266,8 +268,19 @@ func (m *MyTheme) ListThemeFiles() map[string]string {
 }
 
 func (m *MyTheme) Font(style fyne.TextStyle) fyne.Resource {
-	switch style {
-	case fyne.TextStyle{}:
+	switch {
+	case style.Monospace:
+		if m.MonoFont != "" && monoFont == nil {
+			if content, err := readTTFFile(m.MonoFont); err != nil {
+				m.MonoFont = ""
+			} else {
+				monoFont = fyne.NewStaticResource("monoFont", content)
+			}
+		}
+		if monoFont != nil {
+			return monoFont
+		}
+	case style == fyne.TextStyle{}:
 		if m.NormalFont != "" && normalFont == nil {
 			if content, err := readTTFFile(m.NormalFont); err != nil {
 				m.NormalFont = ""
@@ -279,12 +292,12 @@ func (m *MyTheme) Font(style fyne.TextStyle) fyne.Resource {
 		if normalFont != nil {
 			return normalFont
 		}
-	case fyne.TextStyle{Bold: true}:
+	case style.Bold:
 		if m.BoldFont != "" && boldFont == nil {
 			if content, err := os.ReadFile(m.BoldFont); err != nil {
 				m.BoldFont = ""
 			} else {
-				normalFont = fyne.NewStaticResource("boldFont", content)
+				boldFont = fyne.NewStaticResource("boldFont", content)
 			}
 		}
 		if boldFont != nil {
