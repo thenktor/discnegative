@@ -1,6 +1,7 @@
 package widgets
 
 import (
+	"fmt"
 	"image"
 	"slices"
 	"strconv"
@@ -65,6 +66,8 @@ type PlayQueueList struct {
 	tracksMutex sync.RWMutex
 	items       []*util.TrackListModel
 	header      fyne.CanvasObject
+	footer      *widget.Label
+	totalTime   float64
 }
 
 func NewPlayQueueList(im *backend.ImageManager, useNonQueueMenu bool) *PlayQueueList {
@@ -119,6 +122,11 @@ func NewPlayQueueList(im *backend.ImageManager, useNonQueueMenu bool) *PlayQueue
 		}
 	}
 
+	// Create footer label
+	p.footer = widget.NewLabel("")
+	p.footer.TextStyle.Monospace = true
+	p.footer.Alignment = fyne.TextAlignCenter
+
 	return p
 }
 
@@ -126,6 +134,7 @@ func (p *PlayQueueList) SetTracks(trs []*mediaprovider.Track) {
 	p.tracksMutex.Lock()
 	p.items = util.ToTrackListModels(trs)
 	p.tracksMutex.Unlock()
+	p.updateFooter()
 	p.Refresh()
 }
 
@@ -135,6 +144,7 @@ func (p *PlayQueueList) SetItems(items []mediaprovider.MediaItem) {
 		return &util.TrackListModel{Item: item}
 	})
 	p.tracksMutex.Unlock()
+	p.updateFooter()
 	p.Refresh()
 }
 
@@ -157,6 +167,46 @@ func (p *PlayQueueList) SetNowPlaying(itemID string) {
 	}
 	if tr != nil {
 		p.list.RefreshItem(idx)
+	}
+	p.updateFooter()
+}
+
+func (p *PlayQueueList) updateFooter() {
+	p.tracksMutex.RLock()
+	count := len(p.items)
+	p.tracksMutex.RUnlock()
+	
+	// Find current playing index
+	currentIdx := -1
+	if p.nowPlayingID != "" {
+		p.tracksMutex.RLock()
+		for i, item := range p.items {
+			if item.Item.Metadata().ID == p.nowPlayingID {
+				currentIdx = i
+				break
+			}
+		}
+		p.tracksMutex.RUnlock()
+	}
+	
+	// Calculate total time
+	totalTime := 0.0
+	p.tracksMutex.RLock()
+	for _, item := range p.items {
+		totalTime += item.Item.Metadata().Duration.Seconds()
+	}
+	p.tracksMutex.RUnlock()
+	p.totalTime = totalTime
+	
+	// Update footer text
+	if count > 0 {
+		if currentIdx >= 0 {
+			p.footer.SetText(fmt.Sprintf("%d/%d · TT: %s", currentIdx+1, count, util.SecondsToTimeString(totalTime)))
+		} else {
+			p.footer.SetText(fmt.Sprintf("%d/%d · TT: %s", 0, count, util.SecondsToTimeString(totalTime)))
+		}
+	} else {
+		p.footer.SetText("")
 	}
 }
 
@@ -363,9 +413,9 @@ func (p *PlayQueueList) CreateRenderer() fyne.WidgetRenderer {
 		p.createHeader()
 	}
 	if p.header != nil {
-		return widget.NewSimpleRenderer(container.NewBorder(p.header, nil, nil, nil, p.list))
+		return widget.NewSimpleRenderer(container.NewBorder(p.header, p.footer, nil, nil, p.list))
 	}
-	return widget.NewSimpleRenderer(p.list)
+	return widget.NewSimpleRenderer(container.NewBorder(nil, p.footer, nil, nil, p.list))
 }
 
 func (p *PlayQueueList) createHeader() {
