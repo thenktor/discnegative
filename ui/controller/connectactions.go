@@ -3,11 +3,11 @@ package controller
 import (
 	"log"
 
-	"github.com/supersonic-app/supersonic/backend"
-	"github.com/supersonic-app/supersonic/backend/mediaprovider"
-	"github.com/supersonic-app/supersonic/backend/player"
-	"github.com/supersonic-app/supersonic/sharedutil"
-	"github.com/supersonic-app/supersonic/ui/widgets"
+	"github.com/thenktor/discnegative/backend"
+	"github.com/thenktor/discnegative/backend/mediaprovider"
+	"github.com/thenktor/discnegative/backend/player"
+	"github.com/thenktor/discnegative/sharedutil"
+	"github.com/thenktor/discnegative/ui/widgets"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/lang"

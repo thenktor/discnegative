@@ -1,13 +1,13 @@
 [Desktop Entry]
 Type=Application
 Version=1.0
-Name=Supersonic
+Name=DiscNegative
 GenericName=Music Player
 Comment=A lightweight cross-platform desktop client for Subsonic music servers
 Keywords=music;audio;player;subsonic;navidrome;streaming;
 Path=/usr/bin
-Exec=supersonic-desktop
+Exec=discnegative-desktop
 Terminal=false
-Icon=supersonic-desktop
-StartupWMClass=Supersonic
+Icon=discnegative-desktop
+StartupWMClass=DiscNegative
 Categories=Audio;AudioVideo;Music;Player;

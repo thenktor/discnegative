@@ -6,9 +6,9 @@ import (
 
 	"fyne.io/fyne/v2/lang"
 
-	"github.com/supersonic-app/supersonic/backend/mediaprovider"
-	myTheme "github.com/supersonic-app/supersonic/ui/theme"
-	"github.com/supersonic-app/supersonic/ui/util"
+	"github.com/thenktor/discnegative/backend/mediaprovider"
+	myTheme "github.com/thenktor/discnegative/ui/theme"
+	"github.com/thenktor/discnegative/ui/util"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"

@@ -5,7 +5,7 @@ import (
 	"log"
 	"sync"
 
-	"github.com/supersonic-app/supersonic/backend/mediaprovider"
+	"github.com/thenktor/discnegative/backend/mediaprovider"
 )
 
 type LyricsManager struct {

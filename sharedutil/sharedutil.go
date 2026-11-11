@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/supersonic-app/supersonic/backend/mediaprovider"
+	"github.com/thenktor/discnegative/backend/mediaprovider"
 )
 
 func FilterSlice[T any](ss []T, test func(T) bool) []T {

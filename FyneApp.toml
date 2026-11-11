@@ -1,8 +1,9 @@
 [Details]
 Icon = "res/appicon.png"
 Name = "DiscNegative"
-ID = "io.github.supersonic-app.supersonic"
-Version = "0.22.1"
+ID = "io.github.thenktor.discnegative"
+Version = "0.1.0"
+Build = 1
 
 [LinuxAndBSD]
 Categories = ["Audio", "AudioVideo"]

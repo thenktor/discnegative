@@ -2,8 +2,8 @@ package dialogs
 
 import (
 	"github.com/google/uuid"
-	"github.com/supersonic-app/supersonic/backend"
-	"github.com/supersonic-app/supersonic/sharedutil"
+	"github.com/thenktor/discnegative/backend"
+	"github.com/thenktor/discnegative/sharedutil"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"

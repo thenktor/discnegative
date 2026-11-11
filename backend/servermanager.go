@@ -11,9 +11,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/supersonic-app/go-subsonic/subsonic"
-	"github.com/supersonic-app/supersonic/backend/mediaprovider"
-	subsonicMP "github.com/supersonic-app/supersonic/backend/mediaprovider/subsonic"
-	"github.com/supersonic-app/supersonic/res"
+	"github.com/thenktor/discnegative/backend/mediaprovider"
+	subsonicMP "github.com/thenktor/discnegative/backend/mediaprovider/subsonic"
+	"github.com/thenktor/discnegative/res"
 	"github.com/zalando/go-keyring"
 )
 

@@ -6,7 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/widget"
-	myTheme "github.com/supersonic-app/supersonic/ui/theme"
+	myTheme "github.com/thenktor/discnegative/ui/theme"
 )
 
 type ImagePopUp struct {

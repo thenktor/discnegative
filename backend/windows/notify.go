@@ -41,7 +41,7 @@ func SendNotification(n *fyne.Notification, iconFilePath string) {
 	title := escapeNotificationString(n.Title)
 	content := escapeNotificationString(n.Content)
 
-	script := fmt.Sprintf(notificationTemplate, title, content, iconFilePath, "supersonic")
+	script := fmt.Sprintf(notificationTemplate, title, content, iconFilePath, "discnegative")
 	go runScript("notify", script)
 }
 
@@ -55,7 +55,7 @@ var scriptNum = 0
 func runScript(name, script string) {
 	scriptNum++
 	appID := fyne.CurrentApp().UniqueID()
-	fileName := fmt.Sprintf("supersonic-%s-%s-%d.ps1", appID, name, scriptNum)
+	fileName := fmt.Sprintf("discnegative-%s-%s-%d.ps1", appID, name, scriptNum)
 
 	tmpFilePath := filepath.Join(os.TempDir(), fileName)
 	err := os.WriteFile(tmpFilePath, []byte(script), 0o600)

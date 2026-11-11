@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/supersonic-app/go-mpv"
-	"github.com/supersonic-app/supersonic/backend/mediaprovider"
-	"github.com/supersonic-app/supersonic/backend/player"
+	"github.com/thenktor/discnegative/backend/mediaprovider"
+	"github.com/thenktor/discnegative/backend/player"
 )
 
 // Error returned by many Player functions if called before the player has not been initialized.

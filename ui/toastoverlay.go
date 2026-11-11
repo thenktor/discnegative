@@ -12,9 +12,9 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	myTheme "github.com/supersonic-app/supersonic/ui/theme"
-	"github.com/supersonic-app/supersonic/ui/util"
-	"github.com/supersonic-app/supersonic/ui/widgets"
+	myTheme "github.com/thenktor/discnegative/ui/theme"
+	"github.com/thenktor/discnegative/ui/util"
+	"github.com/thenktor/discnegative/ui/widgets"
 )
 
 const (

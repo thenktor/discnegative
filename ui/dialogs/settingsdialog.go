@@ -9,12 +9,12 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/supersonic-app/supersonic/backend"
-	"github.com/supersonic-app/supersonic/backend/player/mpv"
-	"github.com/supersonic-app/supersonic/res"
-	myTheme "github.com/supersonic-app/supersonic/ui/theme"
-	"github.com/supersonic-app/supersonic/ui/util"
-	"github.com/supersonic-app/supersonic/ui/widgets"
+	"github.com/thenktor/discnegative/backend"
+	"github.com/thenktor/discnegative/backend/player/mpv"
+	"github.com/thenktor/discnegative/res"
+	myTheme "github.com/thenktor/discnegative/ui/theme"
+	"github.com/thenktor/discnegative/ui/util"
+	"github.com/thenktor/discnegative/ui/widgets"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"

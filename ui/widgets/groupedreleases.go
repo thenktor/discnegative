@@ -10,9 +10,9 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/supersonic-app/supersonic/backend"
-	myTheme "github.com/supersonic-app/supersonic/ui/theme"
-	"github.com/supersonic-app/supersonic/ui/util"
+	"github.com/thenktor/discnegative/backend"
+	myTheme "github.com/thenktor/discnegative/ui/theme"
+	"github.com/thenktor/discnegative/ui/util"
 )
 
 type GroupedReleasesModel struct {

@@ -1,4 +1,4 @@
-module github.com/supersonic-app/supersonic
+module github.com/thenktor/discnegative
 
 go 1.24.0
 

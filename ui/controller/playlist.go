@@ -10,10 +10,10 @@ import (
 	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
-	"github.com/supersonic-app/supersonic/backend/mediaprovider"
-	"github.com/supersonic-app/supersonic/sharedutil"
-	"github.com/supersonic-app/supersonic/ui/dialogs"
-	"github.com/supersonic-app/supersonic/ui/util"
+	"github.com/thenktor/discnegative/backend/mediaprovider"
+	"github.com/thenktor/discnegative/sharedutil"
+	"github.com/thenktor/discnegative/ui/dialogs"
+	"github.com/thenktor/discnegative/ui/util"
 )
 
 // Show dialog to select playlist.

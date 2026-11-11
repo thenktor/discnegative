@@ -16,14 +16,14 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/supersonic-app/supersonic/backend/ipc"
-	"github.com/supersonic-app/supersonic/backend/mediaprovider"
-	"github.com/supersonic-app/supersonic/backend/player"
-	"github.com/supersonic-app/supersonic/backend/player/mpv"
-	"github.com/supersonic-app/supersonic/backend/util"
-	"github.com/supersonic-app/supersonic/backend/windows"
-	"github.com/supersonic-app/supersonic/res"
-	"github.com/supersonic-app/supersonic/sharedutil"
+	"github.com/thenktor/discnegative/backend/ipc"
+	"github.com/thenktor/discnegative/backend/mediaprovider"
+	"github.com/thenktor/discnegative/backend/player"
+	"github.com/thenktor/discnegative/backend/player/mpv"
+	"github.com/thenktor/discnegative/backend/util"
+	"github.com/thenktor/discnegative/backend/windows"
+	"github.com/thenktor/discnegative/res"
+	"github.com/thenktor/discnegative/sharedutil"
 
 	"github.com/20after4/configdir"
 	"github.com/zalando/go-keyring"
@@ -31,7 +31,7 @@ import (
 
 const (
 	configFile               = "config.toml"
-	portableDir              = "supersonic_portable"
+	portableDir              = res.AppName + "_portable"
 	savedQueueFile           = "saved_queue.json"
 	savedUnshuffledQueueFile = "saved_unshuffled_queue.json"
 	savedShuffledQueueFile   = "saved_shuffled_queue.json"
@@ -102,7 +102,7 @@ func StartupApp(appName, displayAppName, appVersion, appVersionTag, latestReleas
 	var logFile *os.File
 	if isWindowsGUI() {
 		// Can't log to console in Windows GUI app so log to file instead
-		if f, err := os.Create(filepath.Join(confDir, "supersonic.log")); err == nil {
+		if f, err := os.Create(filepath.Join(confDir, res.AppName+".log")); err == nil {
 			log.SetOutput(f)
 			logFile = f
 		}
@@ -569,7 +569,7 @@ func (a *App) SavePlayQueueIfEnabled() {
 	SavePlayQueue(a.ServerManager.ServerID.String(), a.PlaybackManager.GetActivePlayQueue(), a.PlaybackManager, path.Join(a.configDir, savedQueueFile), queueServer)
 	if a.Config.Playback.Shuffle {
 		// if shuffle
-		// save the unshuffled queue to enable unshuffling on restarting supersonic
+		// save the unshuffled queue to enable unshuffling on restarting " + res.AppName
 		// save the shuffled queue again to enable checking if the playQueue was changed server side on start up
 
 		// both files are just saved locally

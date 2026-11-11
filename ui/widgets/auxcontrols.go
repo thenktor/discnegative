@@ -11,8 +11,8 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
-	myTheme "github.com/supersonic-app/supersonic/ui/theme"
-	"github.com/supersonic-app/supersonic/ui/util"
+	myTheme "github.com/thenktor/discnegative/ui/theme"
+	"github.com/thenktor/discnegative/ui/util"
 )
 
 // The "aux" controls for playback, positioned to the right

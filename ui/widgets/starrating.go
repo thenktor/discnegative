@@ -3,7 +3,7 @@ package widgets
 import (
 	"math"
 
-	"github.com/supersonic-app/supersonic/res"
+	"github.com/thenktor/discnegative/res"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"

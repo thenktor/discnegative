@@ -9,7 +9,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	ttwidget "github.com/dweymouth/fyne-tooltip/widget"
 
-	myTheme "github.com/supersonic-app/supersonic/ui/theme"
+	myTheme "github.com/thenktor/discnegative/ui/theme"
 )
 
 type IconButtonSize int

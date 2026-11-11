@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/supersonic-app/go-subsonic/subsonic"
-	"github.com/supersonic-app/supersonic/backend/mediaprovider"
+	"github.com/thenktor/discnegative/backend/mediaprovider"
 )
 
 func (s *subsonicMediaProvider) IterateTracks(searchQuery string) mediaprovider.TrackIterator {

@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/supersonic-app/supersonic/backend/mediaprovider"
+	"github.com/thenktor/discnegative/backend/mediaprovider"
 )
 
 var ErrNoServerConnection = errors.New("not connected to a server")

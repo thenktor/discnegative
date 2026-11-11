@@ -6,8 +6,8 @@ import (
 	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/widget"
 	fynelyrics "github.com/supersonic-app/fyne-lyrics"
-	"github.com/supersonic-app/supersonic/backend/mediaprovider"
-	"github.com/supersonic-app/supersonic/ui/theme"
+	"github.com/thenktor/discnegative/backend/mediaprovider"
+	"github.com/thenktor/discnegative/ui/theme"
 )
 
 type LyricsViewer struct {

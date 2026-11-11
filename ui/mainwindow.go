@@ -9,17 +9,17 @@ import (
 	"time"
 
 	fynetooltip "github.com/dweymouth/fyne-tooltip"
-	"github.com/supersonic-app/supersonic/backend"
-	"github.com/supersonic-app/supersonic/backend/mediaprovider"
-	"github.com/supersonic-app/supersonic/backend/windows"
-	"github.com/supersonic-app/supersonic/res"
-	"github.com/supersonic-app/supersonic/ui/browsing"
-	uicontainer "github.com/supersonic-app/supersonic/ui/container"
-	"github.com/supersonic-app/supersonic/ui/controller"
-	"github.com/supersonic-app/supersonic/ui/dialogs"
-	"github.com/supersonic-app/supersonic/ui/shortcuts"
-	myTheme "github.com/supersonic-app/supersonic/ui/theme"
-	"github.com/supersonic-app/supersonic/ui/util"
+	"github.com/thenktor/discnegative/backend"
+	"github.com/thenktor/discnegative/backend/mediaprovider"
+	"github.com/thenktor/discnegative/backend/windows"
+	"github.com/thenktor/discnegative/res"
+	"github.com/thenktor/discnegative/ui/browsing"
+	uicontainer "github.com/thenktor/discnegative/ui/container"
+	"github.com/thenktor/discnegative/ui/controller"
+	"github.com/thenktor/discnegative/ui/dialogs"
+	"github.com/thenktor/discnegative/ui/shortcuts"
+	myTheme "github.com/thenktor/discnegative/ui/theme"
+	"github.com/thenktor/discnegative/ui/util"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -212,11 +212,11 @@ func (m *MainWindow) UpdateOnTrackChange(item mediaprovider.MediaItem) {
 			if notifySend, err := exec.LookPath("notify-send"); err == nil {
 				go func() {
 					args := []string{
-						"--app-name", "supersonic",
+						"--app-name", res.AppName,
 						"--urgency", "low",
 						"--expire-time", "10000",
 						// replace previous notification
-						"--hint", "string:x-canonical-private-synchronous:supersonic-track",
+						"--hint", "string:x-canonical-private-synchronous:res.AppName-track",
 						meta.Name, strings.TrimPrefix(artistDisp, " – "),
 					}
 

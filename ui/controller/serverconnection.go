@@ -11,8 +11,8 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/widget"
-	"github.com/supersonic-app/supersonic/backend"
-	"github.com/supersonic-app/supersonic/ui/dialogs"
+	"github.com/thenktor/discnegative/backend"
+	"github.com/thenktor/discnegative/ui/dialogs"
 )
 
 func (m *Controller) PromptForFirstServer() {

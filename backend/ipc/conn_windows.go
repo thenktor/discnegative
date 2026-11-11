@@ -10,7 +10,7 @@ import (
 	"github.com/Microsoft/go-winio"
 )
 
-var pipeName = `\\.\pipe\supersonic`
+var pipeName = `\\.\pipe\discnegative`
 
 func init() {
 	if user, err := user.Current(); err == nil {

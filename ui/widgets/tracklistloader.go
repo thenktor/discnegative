@@ -4,7 +4,7 @@ import (
 	"sync/atomic"
 
 	"fyne.io/fyne/v2"
-	"github.com/supersonic-app/supersonic/backend/mediaprovider"
+	"github.com/thenktor/discnegative/backend/mediaprovider"
 )
 
 // Component that manages lazily loading more tracks into a Tracklist

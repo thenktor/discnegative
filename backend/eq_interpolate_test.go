@@ -27,7 +27,7 @@ func TestInterpolateAutoEQTo15Band_ExactMatches(t *testing.T) {
 	result := InterpolateEQ10To15Band(testProfile)
 
 	tests := []struct {
-		supersonicIdx int
+		discnegativeIdx int
 		autoEQIdx     int
 		expectedGain  float64
 	}{
@@ -38,9 +38,9 @@ func TestInterpolateAutoEQTo15Band_ExactMatches(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		if math.Abs(result[tt.supersonicIdx]-tt.expectedGain) > 0.001 {
+		if math.Abs(result[tt.discnegativeIdx]-tt.expectedGain) > 0.001 {
 			t.Errorf("Exact match at index %d (AutoEQ idx %d): expected %f, got %f",
-				tt.supersonicIdx, tt.autoEQIdx, tt.expectedGain, result[tt.supersonicIdx])
+				tt.discnegativeIdx, tt.autoEQIdx, tt.expectedGain, result[tt.discnegativeIdx])
 		}
 	}
 }

@@ -1,12 +1,12 @@
 package ui
 
 import (
-	"github.com/supersonic-app/supersonic/backend"
-	"github.com/supersonic-app/supersonic/backend/mediaprovider"
-	"github.com/supersonic-app/supersonic/ui/controller"
-	"github.com/supersonic-app/supersonic/ui/layouts"
-	"github.com/supersonic-app/supersonic/ui/util"
-	"github.com/supersonic-app/supersonic/ui/widgets"
+	"github.com/thenktor/discnegative/backend"
+	"github.com/thenktor/discnegative/backend/mediaprovider"
+	"github.com/thenktor/discnegative/ui/controller"
+	"github.com/thenktor/discnegative/ui/layouts"
+	"github.com/thenktor/discnegative/ui/util"
+	"github.com/thenktor/discnegative/ui/widgets"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"

@@ -1,7 +1,7 @@
 package widgets
 
 import (
-	"github.com/supersonic-app/supersonic/ui/theme"
+	"github.com/thenktor/discnegative/ui/theme"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"

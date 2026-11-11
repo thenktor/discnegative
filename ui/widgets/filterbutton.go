@@ -2,7 +2,7 @@ package widgets
 
 import (
 	"fyne.io/fyne/v2"
-	"github.com/supersonic-app/supersonic/backend/mediaprovider"
+	"github.com/thenktor/discnegative/backend/mediaprovider"
 )
 
 type FilterButton[M, F any] interface {

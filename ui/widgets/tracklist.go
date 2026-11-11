@@ -6,11 +6,11 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/supersonic-app/supersonic/backend"
-	"github.com/supersonic-app/supersonic/backend/mediaprovider"
-	"github.com/supersonic-app/supersonic/sharedutil"
-	"github.com/supersonic-app/supersonic/ui/layouts"
-	"github.com/supersonic-app/supersonic/ui/util"
+	"github.com/thenktor/discnegative/backend"
+	"github.com/thenktor/discnegative/backend/mediaprovider"
+	"github.com/thenktor/discnegative/sharedutil"
+	"github.com/thenktor/discnegative/ui/layouts"
+	"github.com/thenktor/discnegative/ui/util"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"

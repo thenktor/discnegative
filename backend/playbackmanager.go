@@ -11,10 +11,10 @@ import (
 	"time"
 
 	"github.com/charlievieth/strcase"
-	"github.com/supersonic-app/supersonic/backend/mediaprovider"
-	"github.com/supersonic-app/supersonic/backend/player"
-	"github.com/supersonic-app/supersonic/backend/player/mpv"
-	"github.com/supersonic-app/supersonic/sharedutil"
+	"github.com/thenktor/discnegative/backend/mediaprovider"
+	"github.com/thenktor/discnegative/backend/player"
+	"github.com/thenktor/discnegative/backend/player/mpv"
+	"github.com/thenktor/discnegative/sharedutil"
 )
 
 // A high-level MediaProvider-aware playback engine, serves as an
@@ -74,7 +74,7 @@ func NewPlaybackManager(
 }
 
 func (p *PlaybackManager) addOnTrackChangeHook() {
-	// See https://github.com/supersonic-app/supersonic/issues/483
+	// See https://github.com/thenktor/discnegative/issues/483
 	// On Windows, MPV sometimes fails to start playback when switching to a track
 	// with a different sample rate than the previous. If this is detected,
 	// send a command to the MPV player to force restart playback.
@@ -98,7 +98,7 @@ func (p *PlaybackManager) addOnTrackChangeHook() {
 		if runtime.GOOS != "windows" {
 			return
 		}
-		// workaround for https://github.com/supersonic-app/supersonic/issues/483 (see above comment)
+		// workaround for https://github.com/thenktor/discnegative/issues/483 (see above comment)
 		if p.NowPlayingIndex() != p.engine.getPlayQueueLength() && p.PlaybackStatus().State == player.Playing {
 			p.lastPlayTime = 0
 			go func() {
@@ -252,8 +252,8 @@ func (p *PlaybackManager) LoadItems(items []mediaprovider.MediaItem, insertQueue
 }
 
 // Replaces the specified queue (PlayQueue/ShuffledPlayQueue) with the given tracks.
-// This is used when starting supersonic to load the queue state and directly overrides any previous data.
-// For replacing the queue while supersonic is running, use LoadTracks
+// This is used when starting discnegative to load the queue state and directly overrides any previous data.
+// For replacing the queue while discnegative is running, use LoadTracks
 func (p *PlaybackManager) SetQueueState(tracks []*mediaprovider.Track, queueType QueueType) {
 	p.cmdQueue.SetQueueState(tracks, queueType)
 }
@@ -765,3 +765,4 @@ func (p *PlaybackManager) runCmdQueue(ctx context.Context) {
 		}
 	}
 }
+

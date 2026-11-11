@@ -6,15 +6,15 @@
 # https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
 #
 # Binaries for programs and plugins
-supersonic
+discnegative
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
 *.AppImage
-Supersonic.app
-Supersonic.AppDir/
+DiscNegative.app
+DiscNegative.AppDir/
 appimagetool-x86_64.AppImage
 tmp/
 bin/

@@ -10,11 +10,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/supersonic-app/supersonic/backend/mediaprovider"
-	"github.com/supersonic-app/supersonic/backend/player"
-	"github.com/supersonic-app/supersonic/backend/player/mpv"
-	"github.com/supersonic-app/supersonic/backend/util"
-	"github.com/supersonic-app/supersonic/sharedutil"
+	"github.com/thenktor/discnegative/backend/mediaprovider"
+	"github.com/thenktor/discnegative/backend/player"
+	"github.com/thenktor/discnegative/backend/player/mpv"
+	"github.com/thenktor/discnegative/backend/util"
+	"github.com/thenktor/discnegative/sharedutil"
 )
 
 // TODO: make thread-safe

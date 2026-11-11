@@ -6,10 +6,10 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
-	"github.com/supersonic-app/supersonic/backend"
-	"github.com/supersonic-app/supersonic/backend/mediaprovider"
-	"github.com/supersonic-app/supersonic/sharedutil"
-	"github.com/supersonic-app/supersonic/ui/dialogs"
+	"github.com/thenktor/discnegative/backend"
+	"github.com/thenktor/discnegative/backend/mediaprovider"
+	"github.com/thenktor/discnegative/sharedutil"
+	"github.com/thenktor/discnegative/ui/dialogs"
 )
 
 func (c *Controller) ShowQuickSearch() {

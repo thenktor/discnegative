@@ -143,7 +143,7 @@ func (c *Client) Quit() error {
 }
 
 func (c *Client) sendRequest(path string) (string, error) {
-	resp, err := c.httpC.Get("http://supersonic/" + path)
+	resp, err := c.httpC.Get("http://discnegative/" + path)
 	if err != nil {
 		return "", err
 	}

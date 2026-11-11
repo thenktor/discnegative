@@ -8,7 +8,7 @@ import (
 	"fyne.io/fyne/v2/lang"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/supersonic-app/supersonic/ui/util"
+	"github.com/thenktor/discnegative/ui/util"
 )
 
 // SearchEntry is a search entry widget that will issue a search command

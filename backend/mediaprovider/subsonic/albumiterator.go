@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/supersonic-app/go-subsonic/subsonic"
-	"github.com/supersonic-app/supersonic/backend/mediaprovider"
-	"github.com/supersonic-app/supersonic/backend/mediaprovider/helpers"
-	"github.com/supersonic-app/supersonic/sharedutil"
+	"github.com/thenktor/discnegative/backend/mediaprovider"
+	"github.com/thenktor/discnegative/backend/mediaprovider/helpers"
+	"github.com/thenktor/discnegative/sharedutil"
 )
 
 func (s *subsonicMediaProvider) AlbumSortOrders() []string {

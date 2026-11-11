@@ -12,25 +12,25 @@ import (
 )
 
 // socketPath is automatically initialized based on platform conventions:
-//   - macOS: ~/Library/Caches/supersonic/supersonic.sock (or /tmp/supersonic-{uid}.sock as fallback)
-//   - Linux/Unix: $XDG_RUNTIME_DIR/supersonic.sock (or /tmp/supersonic-{uid}.sock as fallback)
+//   - macOS: ~/Library/Caches/discnegative/discnegative.sock (or /tmp/discnegative-{uid}.sock as fallback)
+//   - Linux/Unix: $XDG_RUNTIME_DIR/discnegative.sock (or /tmp/discnegative-{uid}.sock as fallback)
 //
 // TODO: Add support for portable mode by allowing override via environment variable
-// or configuration file (e.g., SUPERSONIC_SOCKET_PATH).
-var socketPath = "/tmp/supersonic.sock"
+// or configuration file.
+var socketPath = "/tmp/discnegative.sock"
 
 func init() {
 	if runtime.GOOS == "darwin" {
 		if home, err := os.UserHomeDir(); err == nil {
-			socketPath = path.Join(home, "Library", "Caches", "supersonic", "supersonic.sock")
+			socketPath = path.Join(home, "Library", "Caches", "discnegative", "discnegative.sock")
 		} else if user, err := user.Current(); err == nil {
-			socketPath = fmt.Sprintf("/tmp/supersonic-%s.sock", user.Uid)
+			socketPath = fmt.Sprintf("/tmp/discnegative-%s.sock", user.Uid)
 		}
 	} else {
 		if runtime := os.Getenv("XDG_RUNTIME_DIR"); runtime != "" {
-			socketPath = path.Join(runtime, "supersonic.sock")
+			socketPath = path.Join(runtime, "discnegative.sock")
 		} else if user, err := user.Current(); err == nil {
-			socketPath = fmt.Sprintf("/tmp/supersonic-%s.sock", user.Uid)
+			socketPath = fmt.Sprintf("/tmp/discnegative-%s.sock", user.Uid)
 		}
 	}
 }

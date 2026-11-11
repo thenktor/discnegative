@@ -4,7 +4,7 @@ import (
 	"slices"
 	"sync"
 
-	"github.com/supersonic-app/supersonic/backend/mediaprovider"
+	"github.com/thenktor/discnegative/backend/mediaprovider"
 )
 
 type playbackCommandType int

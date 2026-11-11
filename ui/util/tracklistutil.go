@@ -3,8 +3,8 @@ package util
 import (
 	"slices"
 
-	"github.com/supersonic-app/supersonic/backend/mediaprovider"
-	"github.com/supersonic-app/supersonic/sharedutil"
+	"github.com/thenktor/discnegative/backend/mediaprovider"
+	"github.com/thenktor/discnegative/sharedutil"
 )
 
 type TrackListModel struct {

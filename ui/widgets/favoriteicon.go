@@ -1,7 +1,7 @@
 package widgets
 
 import (
-	"github.com/supersonic-app/supersonic/ui/theme"
+	"github.com/thenktor/discnegative/ui/theme"
 )
 
 type FavoriteIcon struct {

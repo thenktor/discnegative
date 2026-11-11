@@ -1,7 +1,7 @@
 package player
 
 import (
-	"github.com/supersonic-app/supersonic/backend/mediaprovider"
+	"github.com/thenktor/discnegative/backend/mediaprovider"
 )
 
 type URLPlayer interface {
