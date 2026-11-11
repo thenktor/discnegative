@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/20after4/configdir"
+	"github.com/supersonic-app/supersonic/res"
 	"github.com/supersonic-app/supersonic/backend/mediaprovider"
 )
 
@@ -78,7 +79,7 @@ func (l *LrcLibFetcher) fetchFromServer(name, artist, album string, durationSecs
 		return nil, err
 	}
 	req.Header.Add("Accept", "application/json")
-	req.Header.Add("User-Agent", "Supersonic")
+	req.Header.Add("User-Agent", res.DisplayName)
 
 	// Navidrome and Gonic substitute "[Unknown Album]" and "Unknown Album", respectively,
 	// for an empty album name. This will break LrcLib matching.

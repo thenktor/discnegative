@@ -22,6 +22,7 @@ import (
 	"github.com/supersonic-app/supersonic/backend/player/mpv"
 	"github.com/supersonic-app/supersonic/backend/util"
 	"github.com/supersonic-app/supersonic/backend/windows"
+	"github.com/supersonic-app/supersonic/res"
 	"github.com/supersonic-app/supersonic/sharedutil"
 
 	"github.com/20after4/configdir"
@@ -437,7 +438,7 @@ func (a *App) SetupWindowsSMTC(hwnd uintptr) {
 
 	a.PlaybackManager.OnSongChange(func(nowPlaying mediaprovider.MediaItem, _ *mediaprovider.Track) {
 		if nowPlaying == nil {
-			smtc.UpdateMetadata("Supersonic", "")
+			smtc.UpdateMetadata(res.DisplayName, "")
 			return
 		}
 		meta := nowPlaying.Metadata()

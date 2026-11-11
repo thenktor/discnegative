@@ -3,7 +3,7 @@ package res
 const (
 	AppName          = "supersonic"
 	AppID            = "io.github.supersonic-app.supersonic"
-	DisplayName      = "Supersonic"
+	DisplayName      = "DiscNegative"
 	AppVersion       = "0.22.1"
 	AppVersionTag    = "v" + AppVersion
 	ConfigFile       = "config.toml"

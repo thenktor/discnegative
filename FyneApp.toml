@@ -1,9 +1,8 @@
 [Details]
 Icon = "res/appicon.png"
-Name = "Supersonic"
+Name = "DiscNegative"
 ID = "io.github.supersonic-app.supersonic"
 Version = "0.22.1"
-Build = 11
 
 [LinuxAndBSD]
 Categories = ["Audio", "AudioVideo"]

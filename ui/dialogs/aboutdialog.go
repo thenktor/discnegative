@@ -29,7 +29,7 @@ func NewAboutDialog(version string) *AboutDialog {
 
 	a.content = container.NewVBox(
 		container.NewAppTabs(
-			container.NewTabItem("Supersonic", a.buildMainTabContainer(version)),
+			container.NewTabItem(res.DisplayName, a.buildMainTabContainer(version)),
 			container.NewTabItem("Credits", a.buildCreditsContainer()),
 			container.NewTabItem("GPL v3", container.NewScroll(a.licenseLabel(res.ResLICENSE))),
 			container.NewTabItem("BSD-3-Clause", container.NewScroll(a.licenseLabel(res.ResBSDLICENSE))),
@@ -56,7 +56,7 @@ func (a *AboutDialog) buildMainTabContainer(version string) *fyne.Container {
 	iconImage := canvas.NewImageFromResource(res.ResAppicon256Png)
 	iconImage.FillMode = canvas.ImageFillContain
 	iconImage.SetMinSize(fyne.NewSize(64, 64))
-	title := widget.NewRichTextWithText("Supersonic")
+	title := widget.NewRichTextWithText(res.DisplayName)
 	title.Segments[0].(*widget.TextSegment).Style.TextStyle.Bold = true
 	title.Segments[0].(*widget.TextSegment).Style.SizeName = theme.SizeNameSubHeadingText
 	title.Segments[0].(*widget.TextSegment).Style.Alignment = fyne.TextAlignCenter
