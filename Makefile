@@ -46,7 +46,7 @@ bundledeps_macos_highsierra:
 	install_name_tool -change "/usr/local/opt/mpv/lib/libmpv.2.dylib" "@executable_path/../Frameworks/libmpv.2.dylib" "./DiscNegative.app/Contents/MacOS/supersonic"
 
 .PHONY: zip_macos
-zip_macos: DiscNegative.zip
+zip_macos: package/darwin/DiscNegative.zip
 
 .PHONY: package_windows
 package_windows:
@@ -60,11 +60,26 @@ package_linux:
 package_freebsd:
 	fyne package -os freebsd -tags migrated_fynedo,x11 -release
 
-DiscNegative.app: $(SRCS) $(ICONS)
+package/darwin/DiscNegative.app: $(SRCS) $(ICONS)
+	@mkdir -p package/darwin/
+	@echo "Packaging for darwin..."
 	MACOSX_DEPLOYMENT_TARGET=10.13.2 fyne package -os darwin -tags migrated_fynedo -release
+	mv DiscNegative.app package/darwin/
 
-DiscNegative.zip: DiscNegative.app
-	zip --symlinks -r DiscNegative.zip DiscNegative.app/
+package/darwin/DiscNegative.zip: package/darwin/DiscNegative.app
+	@cd package/darwin/ && zip --symlinks -r DiscNegative.zip DiscNegative.app/
+
+package/iossimulator/DiscNegative.app: $(SRCS) $(ICONS) # just for testing
+	@mkdir -p package/iossimulator/
+	@echo "Packaging for iossimulator..."
+	IPHONEOS_DEPLOYMENT_TARGET=15.0 fyne package -os iossimulator -tags migrated_fynedo -release
+	mv DiscNegative.app package/iossimulator/
+
+package/ios/DiscNegative.app: $(SRCS) $(ICONS) # just for testing
+	@mkdir -p package/ios/
+	@echo "Packaging for ios..."
+	IPHONEOS_DEPLOYMENT_TARGET=15.0 fyne package -os ios -tags migrated_fynedo -release
+	mv DiscNegative.app package/ios/
 
 res/appicon.png: res/appicon.svg
 	magick -background none "res/appicon.svg[1024x1024]" -define png:compression-level=9 "res/appicon.png" 2>/dev/null
@@ -80,5 +95,5 @@ lint:
 clean:
 	go clean
 	rm -rf bin/
-	rm -rf tar/
+	rm -rf package/
 	rm -rf DiscNegative.app DiscNegative.zip DiscNegative.tar.xz

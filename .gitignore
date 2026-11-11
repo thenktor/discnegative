@@ -18,6 +18,7 @@ DiscNegative.AppDir/
 appimagetool-x86_64.AppImage
 tmp/
 bin/
+package/
 res/appicon.png
 res/appicon-256.png
 
