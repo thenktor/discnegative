@@ -4,6 +4,7 @@ This is a fork of [Supersonic](https://github.com/supersonic-app/supersonic). I'
 
 * Removed some features, that I do not need
 * Tweaked the UI
+* Made it usable on GhostBSD/FreeBSD
 
 [![License](https://img.shields.io/github/license/supersonic-app/supersonic)](https://github.com/thenktor/discnegative/blob/main/LICENSE)
 [![Last Release](https://img.shields.io/github/v/release/thenktor/discnegative?logo=github&label=latest&style=flat)](https://github.com/thenktor/discnegative/releases)
@@ -36,6 +37,7 @@ These features have been removed. If you need them, go upstream to [Supersonic](
 * [x] Built-in 15-band graphic equalizer
 * [x] Download songs, albums or playlists
 * [x] Cast to uPnP/DLNA devices
+* [x] Jellyfin API support
 
 ## Supported servers
 
