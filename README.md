@@ -1,17 +1,55 @@
-# Fork
+# DiscNegative
 
 This is a fork of [Supersonic](https://github.com/supersonic-app/supersonic). I've made the fork to fit the app my personal preferences:
 
-* Removed the features, I do not need
+* Removed some features, that I do not need
 * Tweaked the UI
 
-# Supersonic
-
-[![License](https://img.shields.io/github/license/supersonic-app/supersonic)](https://github.com/supersonic-app/supersonic/blob/main/LICENSE)
-[![Last Release](https://img.shields.io/github/v/release/supersonic-app/supersonic?logo=github&label=latest&style=flat)](https://github.com/supersonic-app/supersonic/releases)
+[![License](https://img.shields.io/github/license/supersonic-app/supersonic)](https://github.com/thenktor/discnegative/blob/main/LICENSE)
+[![Last Release](https://img.shields.io/github/v/release/thenktor/discnegative?logo=github&label=latest&style=flat)](https://github.com/thenktor/discnegative/releases)
 [![Downloads](https://img.shields.io/github/downloads/supersonic-app/supersonic/total?logo=github&style=flat)](https://github.com/supersonic-app/supersonic/releases/latest)
-[![Go Report Card](https://goreportcard.com/badge/github.com/supersonic-app/supersonic)](https://goreportcard.com/report/github.com/supersonic-app/supersonic)
-[![Discord](https://dcbadge.limes.pink/api/server/H6FC9bAMpF?style=flat)](https://discord.gg/H6FC9bAMpF)
+
+## Features
+
+* [x] Fast, lightweight, native UI with infinite scrolling
+* [x] Light and Dark themes, with optional auto theme switching
+* [x] High-quality gapless audio playback powered by MPV, with optional audio exclusive mode
+* [x] ReplayGain support (depends on files being tagged on server)
+* [x] [Custom themes](https://github.com/supersonic-app/supersonic/wiki/Custom-Themes) 
+* [x] Scrobble plays to server, with configurable criteria
+* [x] Add and switch between multiple servers
+* [x] Primary and alternate server hostnames, e.g. for internal and external URLs
+* [x] Set filters in albums browsing view
+* [x] Play "artist radio" (mix of songs from given artist and similar artists, depends on your server's support)
+* [x] Sort tracklist views by column and configure visible tracklist columns
+* [x] Shuffle and repeat playback modes (partial; shuffle album, playlist, artist radio, random songs; repeat one/all)
+* [x] Lyrics support
+* [x] Internet radio station support (Subsonic)
+
+## Removed features
+
+These features have been removed. If you need them, go upstream to [Supersonic](https://github.com/supersonic-app/supersonic).
+
+* [x] Waveform seekbar
+* [x] MPRIS, Windows SMTC, and Mac OS media center integration for media key and desktop control
+* [x] Built-in 15-band graphic equalizer
+* [x] Download songs, albums or playlists
+* [x] Cast to uPnP/DLNA devices
+
+## Supported servers
+
+Supersonic supports any music server with a Subsonic (or OpenSubsonic) API. A partial list of supported servers is as follows:
+
+* [Navidrome](https://navidrome.org) (tested and used by myself)
+* [Gonic](https://github.com/sentriz/gonic) (untested)
+* [LMS](https://github.com/epoupon/lms) (untested)
+* [Nextcloud Music](https://apps.nextcloud.com/apps/music) (untested)
+* [Airsonic-Advanced](https://github.com/airsonic-advanced/airsonic-advanced) (untested)
+* [Ampache](https://ampache.org) (untested)
+* [Funkwhale](https://www.funkwhale.audio/) (untested)
+* [Supysonic](https://github.com/spl0k/supysonic) (untested)
+
+# Supersonic
 
 A lightweight cross-platform desktop client for Subsonic-compatible music servers.
 
@@ -25,44 +63,6 @@ Screenshots of Supersonic running against the Navidrome demo server, showcasing 
 <a href="https://raw.githubusercontent.com/supersonic-app/supersonic/main/res/screenshots/AlbumsView.png"><img src="https://raw.github.com/supersonic-app/supersonic/main/res/screenshots/AlbumsView.png" width="49.5%"/></a>
 <a href="https://raw.githubusercontent.com/supersonic-app/supersonic/main/res/screenshots/FavoriteSongsView.png"><img src="https://raw.github.com/supersonic-app/supersonic/main/res/screenshots/FavoriteSongsView.png" width="49.5%"/></a>
 <a href="https://raw.githubusercontent.com/supersonic-app/supersonic/main/res/screenshots/ArtistView.png"><img src="https://raw.github.com/supersonic-app/supersonic/main/res/screenshots/ArtistView.png" width="49.5%"/></a>
-
-## Supported servers
-
-Supersonic supports any music server with a Subsonic (or OpenSubsonic) API. A partial list of supported servers is as follows:
-
-* [Navidrome](https://navidrome.org)
-* [Gonic](https://github.com/sentriz/gonic)
-* [LMS](https://github.com/epoupon/lms)
-* [Nextcloud Music](https://apps.nextcloud.com/apps/music)
-* [Airsonic-Advanced](https://github.com/airsonic-advanced/airsonic-advanced)
-* [Ampache](https://ampache.org)
-* [Funkwhale](https://www.funkwhale.audio/)
-* [Supysonic](https://github.com/spl0k/supysonic)
-
-## Features
-* [x] Fast, lightweight, native UI with infinite scrolling
-* [x] Light and Dark themes, with optional auto theme switching
-* [x] High-quality gapless audio playback powered by MPV, with optional audio exclusive mode
-* [x] ReplayGain support (depends on files being tagged on server)
-* [x] Waveform seekbar
-* [x] [Custom themes](https://github.com/supersonic-app/supersonic/wiki/Custom-Themes) 
-* [x] MPRIS, Windows SMTC, and Mac OS media center integration for media key and desktop control
-* [x] Built-in 15-band graphic equalizer
-* [x] Scrobble plays to server, with configurable criteria
-* [x] Add and switch between multiple servers
-* [x] Primary and alternate server hostnames, e.g. for internal and external URLs
-* [x] Set filters in albums browsing view
-* [x] Play "artist radio" (mix of songs from given artist and similar artists, depends on your server's support)
-* [x] Sort tracklist views by column and configure visible tracklist columns
-* [x] Download songs, albums or playlists
-* [x] Shuffle and repeat playback modes (partial; shuffle album, playlist, artist radio, random songs; repeat one/all)
-* [x] Lyrics support
-* [x] Internet radio station support (Subsonic)
-* [x] Cast to uPnP/DLNA devices
-* [ ] Server jukebox control (planned)
-* [ ] Browse by folders (planned)
-* [ ] Offline mode (eventually planned)
-* [ ] iOS/Android support (maybe eventually planned)
 
 ## Installation
 
