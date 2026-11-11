@@ -26,7 +26,7 @@ bin/${NAME}: $(SRCS) $(ICONS)
 # so the last 3 cmds move it over manually. This is a bit fragile though
 # since it assumes a specific location and version of the dependency
 .PHONY: package_macos
-package_macos: DiscNegative.app
+package_macos: package/darwin/DiscNegative.app
 
 .PHONY: bundledeps_macos_homebrew
 bundledeps_macos_homebrew:
