@@ -18,6 +18,8 @@ Supersonic.AppDir/
 appimagetool-x86_64.AppImage
 tmp/
 bin/
+res/appicon.png
+res/appicon-256.png
 
 # Test binary, built with `go test -c`
 *.test

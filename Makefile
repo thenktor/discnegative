@@ -1,5 +1,6 @@
 NAME := $(shell basename $(shell go list -m))
 SRCS := $(wildcard *.go) $(wildcard */*.go) $(shell find backend/) $(shell find ui/) $(shell find res/)
+ICONS := res/appicon.png res/appicon-256.png
 
 .PHONY: build
 build: bin/${NAME}
@@ -16,7 +17,7 @@ endif
 export CGO_CFLAGS
 export CGO_LDFLAGS
 
-bin/${NAME}: $(SRCS)
+bin/${NAME}: $(SRCS) $(ICONS)
 	@mkdir -p bin/
 	@echo "Building..."
 	go build -tags $(TAGS) -ldflags "-s -w" -o bin/${NAME}
@@ -59,11 +60,17 @@ package_linux:
 package_freebsd:
 	fyne package -os freebsd -tags migrated_fynedo,x11
 
-Supersonic.app: $(SRCS)
+Supersonic.app: $(SRCS) $(ICONS)
 	MACOSX_DEPLOYMENT_TARGET=10.13.2 fyne package -os darwin -tags migrated_fynedo
 
 Supersonic.zip: Supersonic.app
 	zip --symlinks -r Supersonic.zip Supersonic.app/
+
+res/appicon.png: res/appicon.svg
+	magick -background none "res/appicon.svg[1024x1024]" -define png:compression-level=9 "res/appicon.png" 2>/dev/null
+
+res/appicon-256.png: res/appicon.svg
+	magick -background none "res/appicon.svg[1024x1024]" -define png:compression-level=9 "res/appicon-256.png" 2>/dev/null
 
 .PHONY: lint
 lint:

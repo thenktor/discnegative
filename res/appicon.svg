@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Hintergrund -->
+    <radialGradient id="bg" cx="50%" cy="38%" r="80%">
+      <stop offset="0%" stop-color="#132a1b"/>
+      <stop offset="55%" stop-color="#0b1510"/>
+      <stop offset="100%" stop-color="#050a07"/>
+    </radialGradient>
+
+    <!-- Plattenoberfläche -->
+    <radialGradient id="vinyl" cx="38%" cy="34%" r="80%">
+      <stop offset="0%" stop-color="#1c2a20"/>
+      <stop offset="55%" stop-color="#0e1712"/>
+      <stop offset="100%" stop-color="#070c09"/>
+    </radialGradient>
+
+    <!-- Neon-Label -->
+    <radialGradient id="label" cx="40%" cy="35%" r="75%">
+      <stop offset="0%" stop-color="#a8ff8f"/>
+      <stop offset="45%" stop-color="#3dff1f"/>
+      <stop offset="100%" stop-color="#17c50e"/>
+    </radialGradient>
+
+    <!-- Glanz -->
+    <radialGradient id="sheen" cx="35%" cy="28%" r="60%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.14"/>
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Neon-Glow -->
+    <filter id="neon" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="7" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="blur12" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="12"/>
+    </filter>
+
+    <clipPath id="squircle">
+      <rect width="512" height="512" rx="116" ry="116"/>
+    </clipPath>
+  </defs>
+
+  <!-- Icon-Hintergrund -->
+  <rect width="512" height="512" rx="116" ry="116" fill="url(#bg)"/>
+
+  <g clip-path="url(#squircle)">
+    <!-- Ambient Glow hinter der Platte -->
+    <circle cx="256" cy="256" r="235" fill="#3dff1f" opacity="0.10" filter="url(#blur12)"/>
+
+    <!-- Schallplatte (vergrößert) -->
+    <circle cx="256" cy="256" r="200" fill="url(#vinyl)" stroke="#3dff1f" stroke-width="3" filter="url(#neon)"/>
+
+    <!-- Schallrillen -->
+    <g fill="none" stroke="#3dff1f">
+      <circle cx="256" cy="256" r="180" stroke-opacity="0.30" stroke-width="1.6"/>
+      <circle cx="256" cy="256" r="166" stroke-opacity="0.18" stroke-width="1.2"/>
+      <circle cx="256" cy="256" r="152" stroke-opacity="0.30" stroke-width="1.6"/>
+      <circle cx="256" cy="256" r="138" stroke-opacity="0.18" stroke-width="1.2"/>
+      <circle cx="256" cy="256" r="124" stroke-opacity="0.30" stroke-width="1.6"/>
+      <circle cx="256" cy="256" r="110" stroke-opacity="0.18" stroke-width="1.2"/>
+      <circle cx="256" cy="256" r="96"  stroke-opacity="0.26" stroke-width="1.4"/>
+    </g>
+
+    <!-- Glanz -->
+    <circle cx="256" cy="256" r="200" fill="url(#sheen)"/>
+
+    <!-- Reflexionsbogen unten rechts -->
+    <path d="M 434.5 321 A 190 190 0 0 1 351 420.5" fill="none" stroke="#3dff1f" stroke-opacity="0.35" stroke-width="5" stroke-linecap="round"/>
+
+    <!-- Zentrale Heartbeat-Linie (Referenz Plattencover) -->
+    <path d="M 56.0,261.2 L 58.9,261.2 L 61.8,261.2 L 64.7,260.6 L 67.5,260.6 L 70.4,261.2 L 73.3,260.6 L 76.2,259.2 L 79.1,252.8 L 82.0,249.5 L 84.9,250.8 L 87.8,256.6 L 90.6,259.2 L 93.5,259.9 L 96.4,260.6 L 99.3,260.6 L 102.2,261.2 L 105.1,265.8 L 108.0,274.9 L 110.8,280.1 L 113.7,278.8 L 116.6,268.4 L 119.5,261.2 L 122.4,261.2 L 125.3,260.6 L 128.2,261.2 L 131.1,257.9 L 133.9,221.6 L 136.8,194.9 L 139.7,182.6 L 142.6,198.2 L 145.5,198.2 L 148.4,198.2 L 151.3,182.6 L 154.1,182.6 L 157.0,220.9 L 159.9,263.8 L 162.8,298.9 L 165.7,316.4 L 168.6,302.1 L 171.5,289.1 L 174.4,268.4 L 177.2,250.2 L 180.1,247.6 L 183.0,249.5 L 185.9,254.1 L 188.8,259.2 L 191.7,262.5 L 194.6,259.9 L 197.4,256.6 L 200.3,254.1 L 203.2,254.7 L 206.1,257.3 L 209.0,259.9 L 211.9,262.5 L 214.8,263.8 L 217.6,259.9 L 220.5,258.6 L 223.4,256.0 L 226.3,256.0 L 229.2,256.0 L 232.1,256.0 L 235.0,256.0 L 237.9,256.0 L 240.7,256.0 L 243.6,256.0 L 246.5,256.0 L 249.4,256.0 L 252.3,256.0 L 255.2,256.0 L 258.1,256.0 L 260.9,256.0 L 263.8,256.0 L 266.7,256.0 L 269.6,256.0 L 272.5,256.0 L 275.4,256.0 L 278.3,256.0 L 281.2,256.0 L 284.0,256.0 L 286.9,256.0 L 289.8,256.0 L 292.7,256.0 L 295.6,256.0 L 298.5,256.0 L 301.4,256.0 L 304.2,256.0 L 307.1,256.0 L 310.0,256.0 L 312.9,256.0 L 315.8,256.0 L 318.7,256.0 L 321.6,256.0 L 324.5,256.0 L 327.3,256.0 L 330.2,256.0 L 333.1,256.0 L 336.0,256.0 L 338.9,256.0 L 341.8,256.0 L 344.7,256.0 L 347.5,256.0 L 350.4,256.0 L 353.3,256.0 L 356.2,256.0 L 359.1,256.0 L 362.0,256.0 L 364.9,256.0 L 367.8,256.0 L 370.6,256.0 L 373.5,256.0 L 376.4,256.0 L 379.3,256.0 L 382.2,256.0 L 385.1,256.0 L 388.0,256.0 L 390.8,256.0 L 393.7,256.0 L 396.6,256.0 L 399.5,256.0 L 402.4,256.0 L 405.3,256.0 L 408.2,256.0 L 411.1,256.0 L 413.9,256.0 L 416.8,256.0 L 419.7,256.0 L 422.6,256.0 L 425.5,256.0 L 428.4,256.0 L 431.3,256.0 L 434.1,256.0 L 437.0,256.0 L 439.9,256.0 L 442.8,256.0 L 445.7,256.6 L 448.6,246.9 L 451.5,246.9 L 454.4,246.9 L 456.0,246.9" fill="none" stroke="#3dff1f" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" filter="url(#neon)"/>
+    <path d="M 56.0,261.2 L 58.9,261.2 L 61.8,261.2 L 64.7,260.6 L 67.5,260.6 L 70.4,261.2 L 73.3,260.6 L 76.2,259.2 L 79.1,252.8 L 82.0,249.5 L 84.9,250.8 L 87.8,256.6 L 90.6,259.2 L 93.5,259.9 L 96.4,260.6 L 99.3,260.6 L 102.2,261.2 L 105.1,265.8 L 108.0,274.9 L 110.8,280.1 L 113.7,278.8 L 116.6,268.4 L 119.5,261.2 L 122.4,261.2 L 125.3,260.6 L 128.2,261.2 L 131.1,257.9 L 133.9,221.6 L 136.8,194.9 L 139.7,182.6 L 142.6,198.2 L 145.5,198.2 L 148.4,198.2 L 151.3,182.6 L 154.1,182.6 L 157.0,220.9 L 159.9,263.8 L 162.8,298.9 L 165.7,316.4 L 168.6,302.1 L 171.5,289.1 L 174.4,268.4 L 177.2,250.2 L 180.1,247.6 L 183.0,249.5 L 185.9,254.1 L 188.8,259.2 L 191.7,262.5 L 194.6,259.9 L 197.4,256.6 L 200.3,254.1 L 203.2,254.7 L 206.1,257.3 L 209.0,259.9 L 211.9,262.5 L 214.8,263.8 L 217.6,259.9 L 220.5,258.6 L 223.4,256.0 L 226.3,256.0 L 229.2,256.0 L 232.1,256.0 L 235.0,256.0 L 237.9,256.0 L 240.7,256.0 L 243.6,256.0 L 246.5,256.0 L 249.4,256.0 L 252.3,256.0 L 255.2,256.0 L 258.1,256.0 L 260.9,256.0 L 263.8,256.0 L 266.7,256.0 L 269.6,256.0 L 272.5,256.0 L 275.4,256.0 L 278.3,256.0 L 281.2,256.0 L 284.0,256.0 L 286.9,256.0 L 289.8,256.0 L 292.7,256.0 L 295.6,256.0 L 298.5,256.0 L 301.4,256.0 L 304.2,256.0 L 307.1,256.0 L 310.0,256.0 L 312.9,256.0 L 315.8,256.0 L 318.7,256.0 L 321.6,256.0 L 324.5,256.0 L 327.3,256.0 L 330.2,256.0 L 333.1,256.0 L 336.0,256.0 L 338.9,256.0 L 341.8,256.0 L 344.7,256.0 L 347.5,256.0 L 350.4,256.0 L 353.3,256.0 L 356.2,256.0 L 359.1,256.0 L 362.0,256.0 L 364.9,256.0 L 367.8,256.0 L 370.6,256.0 L 373.5,256.0 L 376.4,256.0 L 379.3,256.0 L 382.2,256.0 L 385.1,256.0 L 388.0,256.0 L 390.8,256.0 L 393.7,256.0 L 396.6,256.0 L 399.5,256.0 L 402.4,256.0 L 405.3,256.0 L 408.2,256.0 L 411.1,256.0 L 413.9,256.0 L 416.8,256.0 L 419.7,256.0 L 422.6,256.0 L 425.5,256.0 L 428.4,256.0 L 431.3,256.0 L 434.1,256.0 L 437.0,256.0 L 439.9,256.0 L 442.8,256.0 L 445.7,256.6 L 448.6,246.9 L 451.5,246.9 L 454.4,246.9 L 456.0,246.9" fill="none" stroke="#f0fff4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+
+    <!-- Zentrales Neon-Label -->
+    <circle cx="256" cy="256" r="58" fill="url(#label)" filter="url(#neon)"/>
+    <circle cx="256" cy="256" r="58" fill="none" stroke="#eafff2" stroke-opacity="0.55" stroke-width="1.5"/>
+
+    <!-- Achsloch -->
+    <circle cx="256" cy="256" r="12" fill="#060b08"/>
+    <circle cx="256" cy="256" r="12" fill="none" stroke="#3dff1f" stroke-opacity="0.9" stroke-width="2" filter="url(#neon)"/>
+  </g>
+
+  <!-- Rand -->
+  <rect x="2.5" y="2.5" width="507" height="507" rx="114" ry="114" fill="none" stroke="#3dff1f" stroke-opacity="0.4" stroke-width="3"/>
+</svg>
