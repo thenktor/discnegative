@@ -15,7 +15,8 @@ This is a fork of [Supersonic](https://github.com/supersonic-app/supersonic). I'
 * [x] Light and Dark themes, with optional auto theme switching
 * [x] High-quality gapless audio playback powered by MPV, with optional audio exclusive mode
 * [x] ReplayGain support (depends on files being tagged on server)
-* [x] [Custom themes](https://github.com/supersonic-app/supersonic/wiki/Custom-Themes) 
+* [x] [Custom themes](https://github.com/supersonic-app/supersonic/wiki/Custom-Themes)
+* [x] Linux MPRIS and Mac OS media center integration for media key and desktop control
 * [x] Scrobble plays to server, with configurable criteria
 * [x] Add and switch between multiple servers
 * [x] Primary and alternate server hostnames, e.g. for internal and external URLs
@@ -31,7 +32,7 @@ This is a fork of [Supersonic](https://github.com/supersonic-app/supersonic). I'
 These features have been removed. If you need them, go upstream to [Supersonic](https://github.com/supersonic-app/supersonic).
 
 * [x] Waveform seekbar
-* [x] MPRIS, Windows SMTC, and Mac OS media center integration for media key and desktop control
+* [x] Windows SMTC for media key and desktop control
 * [x] Built-in 15-band graphic equalizer
 * [x] Download songs, albums or playlists
 * [x] Cast to uPnP/DLNA devices

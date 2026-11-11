@@ -1,20 +1,18 @@
 package main
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
-	"image/png"
 	"log"
 	"os"
 	"runtime"
 	"slices"
-	"sync"
+	
 
 	"github.com/thenktor/discnegative/backend"
-	"github.com/thenktor/discnegative/backend/windows"
+	
 	"github.com/thenktor/discnegative/res"
-	"github.com/thenktor/discnegative/res/wintaskbarthumbs"
+	
 	"github.com/thenktor/discnegative/ui"
 	"github.com/thenktor/discnegative/ui/controller"
 	myTheme "github.com/thenktor/discnegative/ui/theme"
@@ -23,7 +21,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/driver"
+	
 	"fyne.io/fyne/v2/lang"
 )
 
@@ -95,20 +93,6 @@ func main() {
 		}
 	}
 
-	if runtime.GOOS == "windows" {
-		if err := initWindowsTaskbarIcons(); err != nil {
-			log.Printf("Error initializing taskbar thumbnail icons: %s", err.Error())
-		}
-		if err := windows.SetTaskbarButtonToolTips(
-			lang.L("Previous"),
-			lang.L("Next"),
-			lang.L("Play"),
-			lang.L("Pause"),
-		); err != nil {
-			log.Printf("error initializing taskbar button tool tips: %s", err.Error())
-		}
-	}
-
 	fyneApp := app.NewWithID(res.AppID)
 	fyneApp.SetIcon(res.ResAppicon256Png)
 
@@ -117,19 +101,6 @@ func main() {
 	myApp.OnReactivate = util.FyneDoFunc(mainWindow.Show)
 	myApp.OnExit = util.FyneDoFunc(mainWindow.Quit)
 	myApp.OnReloadTheme = util.FyneDoFunc(mainWindow.ReloadTheme)
-
-	if runtime.GOOS == "windows" {
-		windowStartupTasks := sync.OnceFunc(func() {
-			mainWindow.Window.(driver.NativeWindow).RunNative(func(ctx any) {
-				hwnd := ctx.(driver.WindowsWindowContext).HWND
-				if myApp.Config.Application.EnableOSMediaPlayerAPIs {
-					myApp.SetupWindowsSMTC(hwnd)
-				}
-				myApp.SetupWindowsTaskbarButtons(hwnd)
-			})
-		})
-		fyneApp.Lifecycle().SetOnEnteredForeground(windowStartupTasks)
-	}
 
 	if *backend.FlagStartMinimized {
 		if err = myApp.LoginToDefaultServer(); err != nil {
@@ -157,25 +128,3 @@ func main() {
 	myApp.Shutdown()
 }
 
-func initWindowsTaskbarIcons() error {
-	play, err := png.Decode(bytes.NewReader(wintaskbarthumbs.MediaPlayPNG))
-	if err != nil {
-		return err
-	}
-	pause, err := png.Decode(bytes.NewReader(wintaskbarthumbs.MediaPausePNG))
-	if err != nil {
-		return err
-	}
-	prev, err := png.Decode(bytes.NewReader(wintaskbarthumbs.MediaSeekPreviousPNG))
-	if err != nil {
-		return err
-	}
-	next, err := png.Decode(bytes.NewReader(wintaskbarthumbs.MediaSeekNextPNG))
-	if err != nil {
-		return err
-	}
-
-	windows.InitializeTaskbarIcons(prev, next, play, pause)
-
-	return nil
-}

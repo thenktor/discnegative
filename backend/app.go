@@ -12,7 +12,6 @@ import (
 	"reflect"
 	"runtime"
 	"slices"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -21,7 +20,6 @@ import (
 	"github.com/thenktor/discnegative/backend/player"
 	"github.com/thenktor/discnegative/backend/player/mpv"
 	"github.com/thenktor/discnegative/backend/util"
-	"github.com/thenktor/discnegative/backend/windows"
 	"github.com/thenktor/discnegative/res"
 	"github.com/thenktor/discnegative/sharedutil"
 
@@ -56,7 +54,6 @@ type App struct {
 	LocalPlayer     *mpv.Player
 	UpdateChecker   UpdateChecker
 	MPRISHandler    *MPRISHandler
-	WinSMTC         *windows.SMTC
 	ipcServer       ipc.IPCServer
 
 	// UI callbacks to be set in main
@@ -224,7 +221,6 @@ func StartupApp(appName, displayAppName, appVersion, appVersionTag, latestReleas
 			a.ImageManager.GetCoverThumbnail(id) // ensure image is cached locally
 			return a.ImageManager.GetCoverArtUrl(id)
 		})
-		// Windows SMTC is initialized from main once we have a window HWND.
 	}
 
 	a.startConfigWriter(a.bgrndCtx)
@@ -409,94 +405,6 @@ func (a *App) setupMPRIS(mprisAppName string) {
 	a.MPRISHandler.Start()
 }
 
-func (a *App) SetupWindowsSMTC(hwnd uintptr) {
-	smtc, err := windows.InitSMTCForWindow(hwnd)
-	if err != nil {
-		log.Printf("error initializing SMTC: %d", err)
-		return
-	}
-	a.WinSMTC = smtc
-	smtc.UpdateMetadata(a.displayAppName, "")
-
-	smtc.OnButtonPressed(func(btn windows.SMTCButton) {
-		switch btn {
-		case windows.SMTCButtonPlay:
-			a.PlaybackManager.Continue()
-		case windows.SMTCButtonPause:
-			a.PlaybackManager.Pause()
-		case windows.SMTCButtonNext:
-			a.PlaybackManager.SeekNext()
-		case windows.SMTCButtonPrevious:
-			a.PlaybackManager.SeekBackOrPrevious()
-		case windows.SMTCButtonStop:
-			a.PlaybackManager.Stop()
-		}
-	})
-	smtc.OnSeek(func(millis int) {
-		a.PlaybackManager.SeekSeconds(float64(millis) / 1000)
-	})
-
-	a.PlaybackManager.OnSongChange(func(nowPlaying mediaprovider.MediaItem, _ *mediaprovider.Track) {
-		if nowPlaying == nil {
-			smtc.UpdateMetadata(res.DisplayName, "")
-			return
-		}
-		meta := nowPlaying.Metadata()
-		smtc.UpdateMetadata(meta.Name, strings.Join(meta.Artists, ", "))
-		smtc.UpdatePosition(0, int(meta.Duration.Milliseconds()))
-		go func() {
-			a.ImageManager.GetCoverThumbnail(meta.CoverArtID) // ensure image is cached locally
-			if path, err := a.ImageManager.GetCoverArtPath(meta.CoverArtID); err == nil {
-				smtc.SetThumbnail(path)
-			}
-		}()
-	})
-	a.PlaybackManager.OnRadioMetadataChange(func(radioName, title, artist string) {
-		if title != "" {
-			smtc.UpdateMetadata(title, artist)
-			smtc.UpdatePosition(0, 0)
-		} else {
-			smtc.UpdateMetadata(radioName, "")
-			smtc.UpdatePosition(0, 0)
-		}
-	})
-	a.PlaybackManager.OnSeek(func() {
-		playbackStatus := a.PlaybackManager.PlaybackStatus()
-		smtc.UpdatePosition(int(playbackStatus.TimePos*1000), int(playbackStatus.Duration*1000))
-	})
-	a.PlaybackManager.OnPlaying(func() {
-		smtc.SetEnabled(true)
-		smtc.UpdatePlaybackState(windows.SMTCPlaybackStatePlaying)
-	})
-	a.PlaybackManager.OnPaused(func() {
-		smtc.SetEnabled(true)
-		smtc.UpdatePlaybackState(windows.SMTCPlaybackStatePaused)
-	})
-	a.PlaybackManager.OnStopped(func() {
-		smtc.SetEnabled(false)
-		smtc.UpdatePlaybackState(windows.SMTCPlaybackStateStopped)
-	})
-}
-
-func (a *App) SetupWindowsTaskbarButtons(hwnd uintptr) {
-	windows.InitializeTaskbarButtons(hwnd, func(btn windows.TaskbarButton) {
-		switch btn {
-		case windows.TaskbarButtonPrevious:
-			a.PlaybackManager.SeekBackOrPrevious()
-		case windows.TaskbarButtonPlayPause:
-			a.PlaybackManager.PlayPause()
-		case windows.TaskbarButtonNext:
-			a.PlaybackManager.SeekNext()
-		}
-	})
-	a.PlaybackManager.OnPlaying(func() {
-		windows.SetTaskbarButtonIsPlaying(true)
-	})
-	f := func() { windows.SetTaskbarButtonIsPlaying(false) }
-	a.PlaybackManager.OnPaused(f)
-	a.PlaybackManager.OnStopped(f)
-}
-
 func (a *App) LoginToDefaultServer() error {
 	serverCfg := a.ServerManager.GetDefaultServer()
 	if serverCfg == nil {
@@ -543,9 +451,6 @@ func (a *App) Shutdown() {
 	}
 	if a.MPRISHandler != nil {
 		a.MPRISHandler.Shutdown()
-	}
-	if a.WinSMTC != nil {
-		a.WinSMTC.Shutdown()
 	}
 	a.PlaybackManager.DisableCallbacks()
 	a.PlaybackManager.Shutdown() // will trigger scrobble check
