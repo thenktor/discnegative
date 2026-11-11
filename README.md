@@ -7,7 +7,7 @@ This is a fork of [Supersonic](https://github.com/supersonic-app/supersonic). I'
 
 [![License](https://img.shields.io/github/license/supersonic-app/supersonic)](https://github.com/thenktor/discnegative/blob/main/LICENSE)
 [![Last Release](https://img.shields.io/github/v/release/thenktor/discnegative?logo=github&label=latest&style=flat)](https://github.com/thenktor/discnegative/releases)
-[![Downloads](https://img.shields.io/github/downloads/supersonic-app/supersonic/total?logo=github&style=flat)](https://github.com/supersonic-app/supersonic/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/thenktor/discnegative/total?logo=github&style=flat)](https://github.com/thenktor/discnegative/releases/latest)
 
 ## Features
 
