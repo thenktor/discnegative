@@ -115,7 +115,7 @@ func NewBottomPanel(pm *backend.PlaybackManager, im *backend.ImageManager, contr
 		fyne.Do(func() { bp.Controls.SetShuffle(sh) })
 	})
 
-	bp.AuxControls = widgets.NewAuxControls(pm.Volume(), pm.IsAutoplay())
+	bp.AuxControls = widgets.NewAuxControls(pm.Volume(), pm.IsEndlessPlay())
 	pm.OnVolumeChange(func(vol int) {
 		fyne.Do(func() { bp.AuxControls.VolumeControl.SetVolume(vol) })
 	})
@@ -123,8 +123,8 @@ func NewBottomPanel(pm *backend.PlaybackManager, im *backend.ImageManager, contr
 	bp.AuxControls.VolumeControl.OnSetVolume = func(v int) {
 		pm.SetVolume(v)
 	}
-	bp.AuxControls.OnChangeAutoplay = func(autoplay bool) {
-		pm.SetAutoplay(autoplay)
+	bp.AuxControls.OnChangeEndlessPlay = func(endlessPlay bool) {
+		pm.SetEndlessPlay(endlessPlay)
 	}
 
 	bp.imageLoader = util.NewThumbnailLoader(im, bp.NowPlaying.SetImage)

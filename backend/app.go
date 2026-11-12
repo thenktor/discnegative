@@ -441,7 +441,7 @@ func (a *App) Shutdown() {
 		repeatMode = "All"
 	}
 	a.Config.Playback.RepeatMode = repeatMode
-	a.Config.Playback.Autoplay = a.PlaybackManager.IsAutoplay()
+	a.Config.Playback.EndlessPlay = a.PlaybackManager.IsEndlessPlay()
 	a.Config.LocalPlayback.Volume = a.LocalPlayer.GetVolume()
 	a.SavePlayQueueIfEnabled()
 	a.SaveConfigFile()

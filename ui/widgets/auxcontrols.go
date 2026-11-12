@@ -20,27 +20,27 @@ import (
 type AuxControls struct {
 	widget.BaseWidget
 
-	OnChangeAutoplay func(autoplay bool)
+	OnChangeEndlessPlay func(endlessPlay bool)
 
 	VolumeControl *VolumeControl
-	autoplay      *IconButton
+	endlessPlay   *IconButton
 
 	container *fyne.Container
 }
 
-func NewAuxControls(initialVolume int, initialAutoplay bool) *AuxControls {
+func NewAuxControls(initialVolume int, initialEndlessPlay bool) *AuxControls {
 	a := &AuxControls{
 		VolumeControl: NewVolumeControl(initialVolume),
-		autoplay:      NewIconButton(myTheme.AutoplayIcon, nil),
+		endlessPlay:   NewIconButton(myTheme.EndlessPlayIcon, nil),
 	}
 
-	a.autoplay.Highlighted = initialAutoplay
-	// a.autoplay.IconSize = IconButtonSizeSmaller
-	a.autoplay.SetToolTip(lang.L("Autoplay"))
-	a.autoplay.OnTapped = func() {
-		a.SetAutoplay(!a.autoplay.Highlighted)
-		if a.OnChangeAutoplay != nil {
-			a.OnChangeAutoplay(a.autoplay.Highlighted)
+	a.endlessPlay.Highlighted = initialEndlessPlay
+	// a.endlessPlay.IconSize = IconButtonSizeSmaller
+	a.endlessPlay.SetToolTip(lang.L("Endless play"))
+	a.endlessPlay.OnTapped = func() {
+		a.SetEndlessPlay(!a.endlessPlay.Highlighted)
+		if a.OnChangeEndlessPlay != nil {
+			a.OnChangeEndlessPlay(a.endlessPlay.Highlighted)
 		}
 	}
 
@@ -51,7 +51,7 @@ func NewAuxControls(initialVolume int, initialAutoplay bool) *AuxControls {
 			a.VolumeControl,
 			container.New(
 				layout.NewCustomPaddedHBoxLayout(theme.Padding()*1.5),
-				layout.NewSpacer(), a.autoplay, util.NewHSpace(5)),
+				layout.NewSpacer(), a.endlessPlay, util.NewHSpace(5)),
 			layout.NewSpacer(),
 		),
 	)
@@ -63,12 +63,12 @@ func (a *AuxControls) CreateRenderer() fyne.WidgetRenderer {
 	return widget.NewSimpleRenderer(a.container)
 }
 
-func (a *AuxControls) SetAutoplay(autoplay bool) {
-	if autoplay == a.autoplay.Highlighted {
+func (a *AuxControls) SetEndlessPlay(endlessPlay bool) {
+	if endlessPlay == a.endlessPlay.Highlighted {
 		return
 	}
-	a.autoplay.Highlighted = autoplay
-	a.autoplay.Refresh()
+	a.endlessPlay.Highlighted = endlessPlay
+	a.endlessPlay.Refresh()
 }
 
 

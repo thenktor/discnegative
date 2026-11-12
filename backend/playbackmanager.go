@@ -38,8 +38,8 @@ type PlaybackManager struct {
 	lastPlayTime  float64
 	lastPlayingID string
 
-	// whether autoplay tracks are currently being fetched/enqueued
-	pendingAutoplay    bool
+	// whether endless play tracks are currently being fetched/enqueued
+	pendingEndlessPlay bool
 	wasLoadTrackPaused bool
 
 	// current radio metadata
@@ -81,10 +81,10 @@ func (p *PlaybackManager) addOnTrackChangeHook() {
 	p.OnPlayTimeUpdate(func(curTime, totalTime float64, _ bool) {
 		p.lastPlayTime = curTime
 
-		// enqueue autoplay tracks if enabled and nearing end of queue
-		if p.cfg.Autoplay && !p.pendingAutoplay && totalTime-curTime < 10.0 &&
+		// enqueue endless play tracks if enabled and nearing end of queue
+		if p.cfg.EndlessPlay && !p.pendingEndlessPlay && totalTime-curTime < 10.0 &&
 			p.NowPlayingIndex() == p.engine.getPlayQueueLength()-1 {
-			p.enqueueAutoplayTracks()
+			p.enqueueEndlessPlayTracks()
 		}
 	})
 
@@ -497,8 +497,8 @@ func (p *PlaybackManager) GetLoopMode() LoopMode {
 	return p.engine.loopMode
 }
 
-func (p *PlaybackManager) IsAutoplay() bool {
-	return p.cfg.Autoplay
+func (p *PlaybackManager) IsEndlessPlay() bool {
+	return p.cfg.EndlessPlay
 }
 
 func (p *PlaybackManager) PlaybackStatus() PlaybackStatus {
@@ -509,10 +509,10 @@ func (p *PlaybackManager) SetVolume(vol int) {
 	p.cmdQueue.SetVolume(vol)
 }
 
-func (p *PlaybackManager) SetAutoplay(autoplay bool) {
-	p.cfg.Autoplay = autoplay
-	if autoplay && p.NowPlayingIndex() == p.engine.getPlayQueueLength()-1 {
-		p.enqueueAutoplayTracks()
+func (p *PlaybackManager) SetEndlessPlay(endlessPlay bool) {
+	p.cfg.EndlessPlay = endlessPlay
+	if endlessPlay && p.NowPlayingIndex() == p.engine.getPlayQueueLength()-1 {
+		p.enqueueEndlessPlayTracks()
 	}
 }
 
@@ -596,7 +596,7 @@ func (p *PlaybackManager) IsPauseAfterCurrent() bool {
 	return p.engine.pauseAfterCurrent
 }
 
-func (p *PlaybackManager) enqueueAutoplayTracks() {
+func (p *PlaybackManager) enqueueEndlessPlayTracks() {
 	nowPlaying := p.NowPlaying()
 	if nowPlaying == nil {
 		return
@@ -619,7 +619,7 @@ func (p *PlaybackManager) enqueueAutoplayTracks() {
 	// tracks we will enqueue
 	var tracks []*mediaprovider.Track
 
-	filterAutoplayTracks := func(tracks []*mediaprovider.Track) []*mediaprovider.Track {
+	filterEndlessPlayTracks := func(tracks []*mediaprovider.Track) []*mediaprovider.Track {
 		return sharedutil.FilterSlice(tracks, func(t *mediaprovider.Track) bool {
 			shouldSkip :=
 				(p.cfg.SkipOneStarWhenShuffling && t.Rating == 1) ||
@@ -633,9 +633,9 @@ func (p *PlaybackManager) enqueueAutoplayTracks() {
 
 	// since this func is invoked in a callback from the playback engine,
 	// need to do the rest async as it may take time and block other callbacks
-	p.pendingAutoplay = true
+	p.pendingEndlessPlay = true
 	go func() {
-		defer func() { p.pendingAutoplay = false }()
+		defer func() { p.pendingEndlessPlay = false }()
 
 		// first 2 strategies - similar by artist, and similar by genres - only work for tracks
 		if nowPlaying.Metadata().Type == mediaprovider.MediaItemTypeTrack {
@@ -645,9 +645,9 @@ func (p *PlaybackManager) enqueueAutoplayTracks() {
 			if len(tr.ArtistIDs) > 0 {
 				similar, err := s.GetSimilarTracks(tr.ArtistIDs[0], p.appCfg.EnqueueBatchSize)
 				if err != nil {
-					log.Printf("autoplay error: failed to get similar tracks: %v", err)
+					log.Printf("endless play error: failed to get similar tracks: %v", err)
 				}
-				tracks = filterAutoplayTracks(similar)
+				tracks = filterEndlessPlayTracks(similar)
 			}
 
 			// fallback to random tracks from genre
@@ -658,9 +658,9 @@ func (p *PlaybackManager) enqueueAutoplayTracks() {
 					}
 					byGenre, err := s.GetRandomTracks(g, p.appCfg.EnqueueBatchSize)
 					if err != nil {
-						log.Printf("autoplay error: failed to get tracks by genre: %v", err)
+						log.Printf("endless play error: failed to get tracks by genre: %v", err)
 					}
-					tracks = filterAutoplayTracks(byGenre)
+					tracks = filterEndlessPlayTracks(byGenre)
 					if len(tracks) > 0 {
 						break
 					}
@@ -673,9 +673,9 @@ func (p *PlaybackManager) enqueueAutoplayTracks() {
 			// fallback to random tracks
 			random, err := s.GetRandomTracks("", p.appCfg.EnqueueBatchSize)
 			if err != nil {
-				log.Printf("autoplay error: failed to get random tracks: %v", err)
+				log.Printf("endless play error: failed to get random tracks: %v", err)
 			}
-			tracks = filterAutoplayTracks(random)
+			tracks = filterEndlessPlayTracks(random)
 		}
 
 		if len(tracks) > 0 {

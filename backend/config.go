@@ -122,7 +122,7 @@ type NowPlayingPageConfig struct {
 }
 
 type PlaybackConfig struct {
-	Autoplay                 bool
+	EndlessPlay            bool
 	Shuffle                  bool
 	RepeatMode               string
 	SkipOneStarWhenShuffling bool
@@ -252,7 +252,7 @@ func DefaultConfig(appVersionTag string) *Config {
 			TracklistColumns: []string{"Album", "Time", "Plays"},
 		},
 		Playback: PlaybackConfig{
-			Autoplay:   false,
+			EndlessPlay: false,
 			Shuffle:    false,
 			RepeatMode: "None",
 		},
