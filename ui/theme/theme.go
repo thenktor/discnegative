@@ -98,17 +98,30 @@ type MyTheme struct {
 	loadedThemeFilename string
 	loadedThemeFile     *ThemeFile
 	defaultThemeFile    *ThemeFile
+	bundledThemes       map[string]*ThemeFile
 }
 
 var _ fyne.Theme = (*MyTheme)(nil)
 
 func NewMyTheme(config *backend.ThemeConfig, themeFileDir string) *MyTheme {
-	m := &MyTheme{config: config, themeFileDir: themeFileDir}
+	m := &MyTheme{config: config, themeFileDir: themeFileDir, bundledThemes: make(map[string]*ThemeFile)}
 	var err error
 	if m.defaultThemeFile, err = DecodeThemeFile(bytes.NewReader(res.ResDefaultToml.StaticContent)); err != nil {
 		log.Fatalf("Failed to load builtin theme: %v", err.Error())
 	}
+	m.registerBundledTheme(res.ResGreenToml)
 	return m
+}
+
+// registerBundledTheme decodes a bundled theme resource and makes it
+// available by its file name (e.g. "green.toml").
+func (m *MyTheme) registerBundledTheme(r *fyne.StaticResource) {
+	name := filepath.Base(r.StaticName)
+	if themeFile, err := DecodeThemeFile(bytes.NewReader(r.StaticContent)); err == nil {
+		m.bundledThemes[name] = themeFile
+	} else {
+		log.Printf("Failed to load bundled theme %q: %v", name, err.Error())
+	}
 }
 
 // ReloadThemeFile reloads the currently loaded theme file.
@@ -132,8 +145,11 @@ func (m *MyTheme) Color(name fyne.ThemeColorName, defVariant fyne.ThemeVariant) 
 		if m.config.ThemeFile == "" {
 			m.loadedThemeFile = m.defaultThemeFile
 		} else {
-			t, err := ReadThemeFile(path.Join(m.themeFileDir, m.config.ThemeFile))
-			if err == nil {
+			// A user file on disk takes precedence over a bundled theme of the
+			// same name; otherwise fall back to the bundled theme.
+			if t, err := ReadThemeFile(path.Join(m.themeFileDir, m.config.ThemeFile)); err == nil {
+				m.loadedThemeFile = t
+			} else if t, ok := m.bundledThemes[m.config.ThemeFile]; ok {
 				m.loadedThemeFile = t
 			} else {
 				log.Printf("failed to load theme file %q: %s", m.config.ThemeFile, err.Error())
@@ -257,6 +273,10 @@ func (m *MyTheme) ListThemeFiles() map[string]string {
 	}
 
 	result := make(map[string]string)
+	// Include bundled themes first; user files with the same name override them
+	for name, themeFile := range m.bundledThemes {
+		result[name] = themeFile.SupersonicTheme.Name
+	}
 	for _, filePath := range files {
 		// Clean the path to avoid issues with slashes
 		cleanPath := filepath.Clean(filePath)

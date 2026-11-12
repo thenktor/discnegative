@@ -232,6 +232,13 @@ var ResDefaultToml = &fyne.StaticResource{
 	StaticContent: ResDefaultTomlData,
 }
 
+//go:embed themes/green.toml
+var ResGreenTomlData []byte
+var ResGreenToml = &fyne.StaticResource{
+	StaticName:    "themes/green.toml",
+	StaticContent: ResGreenTomlData,
+}
+
 //go:embed LICENSE
 var ResLICENSEData []byte
 var ResLICENSE = &fyne.StaticResource{
