@@ -63,7 +63,7 @@ package_freebsd:
 package/darwin/DiscNegative.app: $(SRCS) $(ICONS)
 	@mkdir -p package/darwin/
 	@echo "Packaging for darwin..."
-	MACOSX_DEPLOYMENT_TARGET=10.13.2 fyne package -os darwin -tags migrated_fynedo -release
+	MACOSX_DEPLOYMENT_TARGET=10.14.0 fyne package -os darwin -tags migrated_fynedo -release
 	mv DiscNegative.app package/darwin/
 
 package/darwin/DiscNegative.zip: package/darwin/DiscNegative.app
