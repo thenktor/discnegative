@@ -225,20 +225,6 @@ var ResUpdownarrowSvg = &fyne.StaticResource{
 	StaticContent: ResUpdownarrowSvgData,
 }
 
-//go:embed themes/default.toml
-var ResDefaultTomlData []byte
-var ResDefaultToml = &fyne.StaticResource{
-	StaticName:    "themes/default.toml",
-	StaticContent: ResDefaultTomlData,
-}
-
-//go:embed themes/green.toml
-var ResGreenTomlData []byte
-var ResGreenToml = &fyne.StaticResource{
-	StaticName:    "themes/green.toml",
-	StaticContent: ResGreenTomlData,
-}
-
 //go:embed LICENSE
 var ResLICENSEData []byte
 var ResLICENSE = &fyne.StaticResource{

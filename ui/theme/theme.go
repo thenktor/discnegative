@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"image/color"
+	"io/fs"
 	"log"
 	"os"
 	"path"
@@ -105,22 +106,39 @@ var _ fyne.Theme = (*MyTheme)(nil)
 
 func NewMyTheme(config *backend.ThemeConfig, themeFileDir string) *MyTheme {
 	m := &MyTheme{config: config, themeFileDir: themeFileDir, bundledThemes: make(map[string]*ThemeFile)}
-	var err error
-	if m.defaultThemeFile, err = DecodeThemeFile(bytes.NewReader(res.ResDefaultToml.StaticContent)); err != nil {
+	content, err := res.ThemesFS.ReadFile("themes/default.toml")
+	if err != nil {
 		log.Fatalf("Failed to load builtin theme: %v", err.Error())
 	}
-	m.registerBundledTheme(res.ResGreenToml)
+	if m.defaultThemeFile, err = DecodeThemeFile(bytes.NewReader(content)); err != nil {
+		log.Fatalf("Failed to load builtin theme: %v", err.Error())
+	}
+	m.registerBundledThemes()
 	return m
 }
 
-// registerBundledTheme decodes a bundled theme resource and makes it
-// available by its file name (e.g. "green.toml").
-func (m *MyTheme) registerBundledTheme(r *fyne.StaticResource) {
-	name := filepath.Base(r.StaticName)
-	if themeFile, err := DecodeThemeFile(bytes.NewReader(r.StaticContent)); err == nil {
-		m.bundledThemes[name] = themeFile
-	} else {
-		log.Printf("Failed to load bundled theme %q: %v", name, err.Error())
+// registerBundledThemes decodes all bundled theme files (res/themes/*.toml)
+// except default.toml and makes them available by file name (e.g. "green.toml").
+func (m *MyTheme) registerBundledThemes() {
+	files, err := fs.Glob(res.ThemesFS, "themes/*.toml")
+	if err != nil {
+		log.Fatalf("Failed to list bundled themes: %v", err.Error())
+	}
+	for _, filePath := range files {
+		name := filepath.Base(filePath)
+		if name == "default.toml" {
+			continue
+		}
+		content, err := res.ThemesFS.ReadFile(filePath)
+		if err != nil {
+			log.Printf("Failed to read bundled theme %q: %v", name, err.Error())
+			continue
+		}
+		if themeFile, err := DecodeThemeFile(bytes.NewReader(content)); err == nil {
+			m.bundledThemes[name] = themeFile
+		} else {
+			log.Printf("Failed to load bundled theme %q: %v", name, err.Error())
+		}
 	}
 }
 
