@@ -176,9 +176,9 @@ func (p *PlayQueueList) updateFooter() {
 	count := len(p.items)
 	p.tracksMutex.RUnlock()
 	
-	// Find current playing index
+	// Find current playing index (queue only - not shown for the related list)
 	currentIdx := -1
-	if p.nowPlayingID != "" {
+	if !p.useNonQueueMenu && p.nowPlayingID != "" {
 		p.tracksMutex.RLock()
 		for i, item := range p.items {
 			if item.Item.Metadata().ID == p.nowPlayingID {
@@ -198,9 +198,12 @@ func (p *PlayQueueList) updateFooter() {
 	p.tracksMutex.RUnlock()
 	p.totalTime = totalTime
 	
-	// Update footer text
+	// Update footer text. The current/total position only makes sense for the
+	// play queue (the actual playback order), not the related tracks list.
 	if count > 0 {
-		if currentIdx >= 0 {
+		if p.useNonQueueMenu {
+			p.footer.SetText(fmt.Sprintf("TT: %s", util.SecondsToTimeString(totalTime)))
+		} else if currentIdx >= 0 {
 			p.footer.SetText(fmt.Sprintf("%d/%d · TT: %s", currentIdx+1, count, util.SecondsToTimeString(totalTime)))
 		} else {
 			p.footer.SetText(fmt.Sprintf("%d/%d · TT: %s", 0, count, util.SecondsToTimeString(totalTime)))
