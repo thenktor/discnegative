@@ -63,6 +63,7 @@ package_freebsd:
 package/darwin/DiscNegative.app: $(SRCS) $(ICONS)
 	@mkdir -p package/darwin/
 	@echo "Packaging for darwin..."
+	@rm -rf package/darwin/DiscNegative.app
 	MACOSX_DEPLOYMENT_TARGET=10.14.0 fyne package -os darwin -tags migrated_fynedo -release
 	mv DiscNegative.app package/darwin/
 
@@ -70,14 +71,22 @@ package/darwin/DiscNegative.zip: package/darwin/DiscNegative.app
 	@cd package/darwin/ && zip --symlinks -r DiscNegative.zip DiscNegative.app/
 
 package/iossimulator/DiscNegative.app: $(SRCS) $(ICONS) # just for testing
+	# run the app on macOS:
+	# xcrun simctl list devices available
+	# xcrun simctl boot "iPad Air 11-inch (M4)"
+	# xcrun simctl install booted package/iossimulator/DiscNegative.app
+	# xcrun simctl launch --console-pty booted io.github.thenktor.discnegative 2>&1 | tee /tmp/discnegative.log
+	# open "$(xcode-select -p)/../Applications/DeviceHub.app"
 	@mkdir -p package/iossimulator/
 	@echo "Packaging for iossimulator..."
-	IPHONEOS_DEPLOYMENT_TARGET=15.0 fyne package -os iossimulator -tags migrated_fynedo -release
+	@rm -rf package/iossimulator/DiscNegative.app
+	IPHONEOS_DEPLOYMENT_TARGET=15.0 fyne package -os iossimulator -tags migrated_fynedo,iossimulator -release
 	mv DiscNegative.app package/iossimulator/
 
 package/ios/DiscNegative.app: $(SRCS) $(ICONS) # just for testing
 	@mkdir -p package/ios/
 	@echo "Packaging for ios..."
+	@rm -rf package/ios/DiscNegative.app
 	IPHONEOS_DEPLOYMENT_TARGET=15.0 fyne package -os ios -tags migrated_fynedo -release
 	mv DiscNegative.app package/ios/
 
