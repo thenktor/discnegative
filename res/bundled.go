@@ -36,13 +36,6 @@ var ResLibrarySvg = &fyne.StaticResource{
 	StaticContent: ResLibrarySvgData,
 }
 
-//go:embed icons/publicdomain/cast.svg
-var ResCastSvgData []byte
-var ResCastSvg = &fyne.StaticResource{
-	StaticName:    "icons/publicdomain/cast.svg",
-	StaticContent: ResCastSvgData,
-}
-
 //go:embed icons/publicdomain/disc.svg
 var ResDiscSvgData []byte
 var ResDiscSvg = &fyne.StaticResource{
@@ -83,13 +76,6 @@ var ResMusicnotesSvgData []byte
 var ResMusicnotesSvg = &fyne.StaticResource{
 	StaticName:    "icons/publicdomain/musicnotes.svg",
 	StaticContent: ResMusicnotesSvgData,
-}
-
-//go:embed icons/publicdomain/oscilloscope.svg
-var ResOscilloscopeSvgData []byte
-var ResOscilloscopeSvg = &fyne.StaticResource{
-	StaticName:    "icons/publicdomain/oscilloscope.svg",
-	StaticContent: ResOscilloscopeSvgData,
 }
 
 //go:embed icons/publicdomain/people.svg
