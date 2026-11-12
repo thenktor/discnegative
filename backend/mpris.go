@@ -1,3 +1,8 @@
+// MPRIS (the freedesktop.org D-Bus media player spec) is only wired up
+// where a D-Bus session bus may exist: Linux and the BSDs. On other
+// platforms mpris_other.go provides a no-op stub.
+//go:build linux || freebsd || netbsd
+
 package backend
 
 import (

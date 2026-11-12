@@ -214,7 +214,7 @@ func StartupApp(appName, displayAppName, appVersion, appVersionTag, latestReleas
 
 	// OS media center integrations
 	if a.Config.Application.EnableOSMediaPlayerAPIs {
-		// Linux MPRIS
+		// Linux/BSD MPRIS (no-op elsewhere, see mpris_other.go)
 		a.setupMPRIS(displayAppName)
 		// MacOS MPNowPlayingInfoCenter
 		InitMPMediaHandler(a.PlaybackManager, func(id string) (string, error) {
