@@ -17,6 +17,8 @@ Primary = "#8bc34a"
 Focus = "#276b2b"
 Selection = "#8bc34a3f"
 Hyperlink = "#8bc34a"
+OverlayBackground = "#181e1d"
+MenuBackground = "#282a29"
 
 [LightColors]
 PageBackground = "#FAFAFA"
