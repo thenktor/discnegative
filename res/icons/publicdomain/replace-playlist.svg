@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 24 24" fill="none" role="img" aria-label="Replace playlist">
+  <!-- Playlist: three track lines (left) -->
+  <path d="M1.9 4.5h8.1" stroke="#000000" stroke-width="2.3" stroke-linecap="round"/>
+  <path d="M1.9 12h8.1" stroke="#000000" stroke-width="2.3" stroke-linecap="round"/>
+  <path d="M1.9 19.5h8.1" stroke="#000000" stroke-width="2.3" stroke-linecap="round"/>
+  <!-- Replace: swap arrows (right) -->
+  <path d="M13.44 9.12h5.77" stroke="#000000" stroke-width="2.3" stroke-linecap="round"/>
+  <path d="M19.21 6.23L23.25 9.12L19.21 12z" fill="#000000"/>
+  <path d="M22.67 14.89h-5.77" stroke="#000000" stroke-width="2.3" stroke-linecap="round"/>
+  <path d="M16.9 12L12.87 14.89L16.9 17.77z" fill="#000000"/>
+</svg>

@@ -35,9 +35,9 @@ type PlayQueueListModel struct {
 type PlayQueueList struct {
 	widget.BaseWidget
 
-	Reorderable    bool
-	DisableRating  bool
-	DisableSharing bool
+	Reorderable            bool
+	DisableRating          bool
+	DisableSharing         bool
 	ShowScrollToNowPlaying bool // Whether to show the scroll-to-now-playing header
 
 	// user action callbacks
@@ -54,6 +54,9 @@ type PlayQueueList struct {
 	OnShare             func(tracks []*mediaprovider.Track)
 	OnShowArtistPage    func(artistID string)
 	OnReorderItems      func(idxs []int, reorderTo int)
+	// related list only: replace the play queue with the related tracks
+	// (the currently playing track stays first and keeps playing)
+	OnReplaceQueueWithRelated func()
 
 	useNonQueueMenu bool
 	menu            *util.TrackContextMenu // ctx menu for when only tracks are selected
@@ -67,6 +70,7 @@ type PlayQueueList struct {
 	items       []*util.TrackListModel
 	header      fyne.CanvasObject
 	footer      *widget.Label
+	footerBox   fyne.CanvasObject // footer, possibly wrapped with the replace-queue button
 	totalTime   float64
 }
 
@@ -126,6 +130,18 @@ func NewPlayQueueList(im *backend.ImageManager, useNonQueueMenu bool) *PlayQueue
 	p.footer = widget.NewLabel("")
 	p.footer.TextStyle.Monospace = true
 	p.footer.Alignment = fyne.TextAlignCenter
+	p.footerBox = p.footer
+	if p.useNonQueueMenu {
+		// related list: add a button to replace the play queue with these tracks
+		replaceBtn := ttwidget.NewButtonWithIcon("", myTheme.ReplacePlaylistIcon, func() {
+			if p.OnReplaceQueueWithRelated != nil {
+				p.OnReplaceQueueWithRelated()
+			}
+		})
+		replaceBtn.SetToolTip(lang.L("Replace play queue with related tracks"))
+		replaceBtn.Importance = widget.LowImportance
+		p.footerBox = container.NewBorder(nil, nil, nil, replaceBtn, p.footer)
+	}
 
 	return p
 }
@@ -175,7 +191,7 @@ func (p *PlayQueueList) updateFooter() {
 	p.tracksMutex.RLock()
 	count := len(p.items)
 	p.tracksMutex.RUnlock()
-	
+
 	// Find current playing index (queue only - not shown for the related list)
 	currentIdx := -1
 	if !p.useNonQueueMenu && p.nowPlayingID != "" {
@@ -188,7 +204,7 @@ func (p *PlayQueueList) updateFooter() {
 		}
 		p.tracksMutex.RUnlock()
 	}
-	
+
 	// Calculate total time
 	totalTime := 0.0
 	p.tracksMutex.RLock()
@@ -197,7 +213,7 @@ func (p *PlayQueueList) updateFooter() {
 	}
 	p.tracksMutex.RUnlock()
 	p.totalTime = totalTime
-	
+
 	// Update footer text. The current/total position only makes sense for the
 	// play queue (the actual playback order), not the related tracks list.
 	if count > 0 {
@@ -416,9 +432,9 @@ func (p *PlayQueueList) CreateRenderer() fyne.WidgetRenderer {
 		p.createHeader()
 	}
 	if p.header != nil {
-		return widget.NewSimpleRenderer(container.NewBorder(p.header, p.footer, nil, nil, p.list))
+		return widget.NewSimpleRenderer(container.NewBorder(p.header, p.footerBox, nil, nil, p.list))
 	}
-	return widget.NewSimpleRenderer(container.NewBorder(nil, p.footer, nil, nil, p.list))
+	return widget.NewSimpleRenderer(container.NewBorder(nil, p.footerBox, nil, nil, p.list))
 }
 
 func (p *PlayQueueList) createHeader() {
@@ -428,7 +444,7 @@ func (p *PlayQueueList) createHeader() {
 	})
 	scrollToNowPlayingBtn.SetToolTip(lang.L("Scroll to now playing"))
 	scrollToNowPlayingBtn.Importance = widget.LowImportance
-	
+
 	p.header = container.NewHBox(scrollToNowPlayingBtn, layout.NewSpacer())
 }
 

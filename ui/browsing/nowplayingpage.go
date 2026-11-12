@@ -184,6 +184,22 @@ func NewNowPlayingPage(
 	a.relatedList.OnShowTrackInfo = func(track *mediaprovider.Track) {
 		a.contr.ShowTrackInfoDialog(track)
 	}
+	a.relatedList.OnReplaceQueueWithRelated = func() {
+		cur := a.pm.NowPlaying()
+		if cur == nil {
+			return
+		}
+		relatedItems := sharedutil.CopyTrackSliceToMediaItemSlice(a.related)
+		// the currently playing track goes first; drop any duplicate of it
+		newQueue := make([]mediaprovider.MediaItem, 0, len(relatedItems)+1)
+		newQueue = append(newQueue, cur)
+		for _, it := range relatedItems {
+			if it.Metadata().ID != cur.Metadata().ID {
+				newQueue = append(newQueue, it)
+			}
+		}
+		a.pm.UpdatePlayQueue(newQueue)
+	}
 	a.lyricsViewer = widgets.NewLyricsViewer(a.onSeekToLyricLine)
 	a.statusLabel = widget.NewLabel(lang.L("Stopped"))
 	a.statusLabel.TextStyle.Monospace = true

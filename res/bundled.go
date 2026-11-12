@@ -99,6 +99,13 @@ var ResPlayqueueSvg = &fyne.StaticResource{
 	StaticContent: ResPlayqueueSvgData,
 }
 
+//go:embed icons/publicdomain/replace-playlist.svg
+var ResReplacePlaylistSvgData []byte
+var ResReplacePlaylistSvg = &fyne.StaticResource{
+	StaticName:    "icons/publicdomain/replace-playlist.svg",
+	StaticContent: ResReplacePlaylistSvgData,
+}
+
 //go:embed icons/publicdomain/sidebar.svg
 var ResSidebarSvgData []byte
 var ResSidebarSvg = &fyne.StaticResource{

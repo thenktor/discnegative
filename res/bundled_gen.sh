@@ -13,6 +13,7 @@ fyne bundle -append -prefix Res icons/publicdomain/musicnotes.svg >> bundled.go
 fyne bundle -append -prefix Res icons/publicdomain/people.svg >> bundled.go
 fyne bundle -append -prefix Res icons/publicdomain/playlist.svg >> bundled.go
 fyne bundle -append -prefix Res icons/publicdomain/playqueue.svg >> bundled.go
+fyne bundle -append -prefix Res icons/publicdomain/replace-playlist.svg >> bundled.go
 fyne bundle -append -prefix Res icons/publicdomain/sidebar.svg >> bundled.go
 fyne bundle -append -prefix Res icons/publicdomain/star-outline.svg >> bundled.go
 fyne bundle -append -prefix Res icons/publicdomain/star-filled.svg >> bundled.go
@@ -22,6 +23,7 @@ fyne bundle -append -prefix Res icons/publicdomain/list.svg >> bundled.go
 fyne bundle -append -prefix Res icons/publicdomain/filter.svg >> bundled.go
 fyne bundle -append -prefix Res icons/publicdomain/save.svg >> bundled.go
 fyne bundle -append -prefix Res icons/publicdomain/saveas.svg >> bundled.go
+fyne bundle -append -prefix Res icons/publicdomain/jump-to-current-track.svg >> bundled.go
 fyne bundle -append -prefix Res icons/remix_design/broadcast.svg >> bundled.go
 fyne bundle -append -prefix Res icons/remix_design/repeat.svg >> bundled.go
 fyne bundle -append -prefix Res icons/remix_design/repeatone.svg >> bundled.go
