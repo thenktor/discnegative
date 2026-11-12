@@ -119,7 +119,7 @@ func NewMyTheme(config *backend.ThemeConfig, themeFileDir string) *MyTheme {
 }
 
 // registerBundledThemes decodes all bundled theme files (res/themes/*.toml)
-// except default.toml and makes them available by file name (e.g. "green.toml").
+// except default.toml and makes them available by file name (e.g. "blue.toml").
 func (m *MyTheme) registerBundledThemes() {
 	files, err := fs.Glob(res.ThemesFS, "themes/*.toml")
 	if err != nil {

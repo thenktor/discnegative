@@ -457,7 +457,7 @@ func (s *SettingsDialog) createPlaybackTab(isLocalPlayer, isReplayGainPlayer boo
 }
 
 func (s *SettingsDialog) createAppearanceTab(window fyne.Window) *container.TabItem {
-	themeNames := []string{"Default"}
+	themeNames := []string{"Green"}
 	themeFileNames := []string{""}
 	i, selIndex := 1, 0
 	for filename, displayname := range s.themeFiles {
