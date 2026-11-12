@@ -1,6 +1,6 @@
 [SupersonicTheme]
 Name = "Green"
-Version = "0.2"
+Version = "0.3"
 SupportsDark = true
 SupportsLight = true
 
@@ -13,9 +13,8 @@ ScrollBar = "#F3F3F3"
 Button = "#14141432"
 Foreground = "#e6e6e6"
 InputBackground = "#14141432"
-# Green accents (instead of the default blue)
 Primary = "#8bc34a"
-Focus = "#8bc34a7f"
+Focus = "#276b2b"
 Selection = "#8bc34a3f"
 Hyperlink = "#8bc34a"
 
@@ -28,8 +27,7 @@ ScrollBar = "#565656"
 Button = "#C8C8C8F0"
 DisabledButton = "#CDCDCDF0"
 Foreground = "#262626"
-# Green accents (instead of the default blue)
-Primary = "#8bc34a"
-Focus = "#8bc34a7f"
-Selection = "#8bc34a3f"
-Hyperlink = "#8bc34a"
+Primary = "#33691e"
+Focus = "#33691e7f"
+Selection = "#33691e3f"
+Hyperlink = "#33691e"

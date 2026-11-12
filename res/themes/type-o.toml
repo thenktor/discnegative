@@ -1,0 +1,33 @@
+[SupersonicTheme]
+Name = "Type-O"
+Version = "0.1"
+SupportsDark = true
+SupportsLight = true
+
+[DarkColors]
+PageBackground = "#0b1510"
+Background = "#132a1b"
+ListHeader = "#1c2a20"
+PageHeader = "#101f16"
+InputBackground = "#0e1712"
+Button = "#1c2a20"
+Foreground = "#eafff2"
+ScrollBar = "#3dff1f"
+Primary = "#3dff1f"
+Hyperlink = "#3dff1f"
+Selection = "#3dff1f33"
+Focus = "#1b5e20"
+
+[LightColors]
+PageBackground = "#f0fff4"
+Background = "#eafff2"
+ListHeader = "#d7f5c4"
+PageHeader = "#dff8cd"
+InputBackground = "#eafff2"
+Button = "#d7f5c4"
+Foreground = "#132a1b"
+ScrollBar = "#388e3c"
+Primary = "#2e7d32"
+Hyperlink = "#2e7d32"
+Selection = "#388e3c33"
+Focus = "#8bc34a"
