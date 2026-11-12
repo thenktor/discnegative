@@ -60,8 +60,8 @@ var (
 
 	// opacity when unhovered
 	playBtnOpacity     = float32(0.85)
-	playBtnSize        = fyne.NewSquareSize(60)
-	playBtnHoveredSize = fyne.NewSquareSize(70)
+	playBtnSize        = fyne.NewSquareSize(40)
+	playBtnHoveredSize = fyne.NewSquareSize(50)
 
 	// current item animating mouse out, if any
 	gridViewMouseOutAnim *fyne.Animation
