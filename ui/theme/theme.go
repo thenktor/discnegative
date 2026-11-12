@@ -129,12 +129,16 @@ func (m *MyTheme) AppearanceMode() AppearanceMode {
 func (m *MyTheme) Color(name fyne.ThemeColorName, defVariant fyne.ThemeVariant) color.Color {
 	// load theme file if necessary
 	if m.loadedThemeFile == nil || m.config.ThemeFile != m.loadedThemeFilename {
-		t, err := ReadThemeFile(path.Join(m.themeFileDir, m.config.ThemeFile))
-		if err == nil {
-			m.loadedThemeFile = t
-		} else {
-			log.Printf("failed to load theme file %q: %s", m.config.ThemeFile, err.Error())
+		if m.config.ThemeFile == "" {
 			m.loadedThemeFile = m.defaultThemeFile
+		} else {
+			t, err := ReadThemeFile(path.Join(m.themeFileDir, m.config.ThemeFile))
+			if err == nil {
+				m.loadedThemeFile = t
+			} else {
+				log.Printf("failed to load theme file %q: %s", m.config.ThemeFile, err.Error())
+				m.loadedThemeFile = m.defaultThemeFile
+			}
 		}
 		m.loadedThemeFilename = m.config.ThemeFile
 	}
