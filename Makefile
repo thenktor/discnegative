@@ -75,12 +75,12 @@ package/iossimulator/DiscNegative.app: $(SRCS) $(ICONS) # just for testing
 	# xcrun simctl list devices available
 	# xcrun simctl boot "iPad Air 11-inch (M4)"
 	# xcrun simctl install booted package/iossimulator/DiscNegative.app
-	# xcrun simctl launch --console-pty booted io.github.thenktor.discnegative 2>&1 | tee /tmp/discnegative.log
 	# open "$(xcode-select -p)/../Applications/DeviceHub.app"
+	# xcrun simctl launch --console-pty booted io.github.thenktor.discnegative 2>&1 | tee /tmp/discnegative.log
 	@mkdir -p package/iossimulator/
 	@echo "Packaging for iossimulator..."
 	@rm -rf package/iossimulator/DiscNegative.app
-	IPHONEOS_DEPLOYMENT_TARGET=15.0 fyne package -os iossimulator -tags migrated_fynedo,iossimulator -release
+	IPHONEOS_DEPLOYMENT_TARGET=15.0 fyne package -os iossimulator -tags migrated_fynedo,iossimulator
 	mv DiscNegative.app package/iossimulator/
 
 package/ios/DiscNegative.app: $(SRCS) $(ICONS) # just for testing
