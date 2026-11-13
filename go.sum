@@ -28,8 +28,6 @@ github.com/dweymouth/fyne-advanced-list v0.0.0-20250211191927-58ea85eec72c h1:UX
 github.com/dweymouth/fyne-advanced-list v0.0.0-20250211191927-58ea85eec72c/go.mod h1:Idgzr4LYzve8IPHF1stLO1bdGQZnDKt/bT9WfJflCGw=
 github.com/dweymouth/fyne-tooltip v0.4.0 h1:ZkMhy4f8lHklyjNnKJlSEJ2pLPnYWVD7tu2+YEgmp+w=
 github.com/dweymouth/fyne-tooltip v0.4.0/go.mod h1:jXYbY561DTIXXqkauzltI3o/hsVaQd2KY8Ry2FXy7Xk=
-github.com/dweymouth/fyne/v2 v2.3.0-rc1.0.20260809142433-9ca176ed4373 h1:mJ+A+gJDg/mCIDd1qgFBRBt4ls2sQ4np8IIgtx1YqxY=
-github.com/dweymouth/fyne/v2 v2.3.0-rc1.0.20260809142433-9ca176ed4373/go.mod h1:JGEhUzkvrySOqyhi1uSMjCl5yWX2Nn+tY/exBbFkpGw=
 github.com/fsnotify/fsnotify v1.9.0 h1:2Ml+OJNzbYCTzsxtv8vKSFD9PbJjmhYF14k/jKC7S9k=
 github.com/fsnotify/fsnotify v1.9.0/go.mod h1:8jBTzvmWwFyi3Pb8djgCCO5IBqzKJ/Jwo8TRcHyHii0=
 github.com/fyne-io/gl-js v0.2.1-0.20260315212741-029c47fd27e8 h1:0kdPD/GEntpWmZEK5Zu/xE6Tr37jYCVDf9QP8lA/QK8=
@@ -94,6 +92,8 @@ github.com/supersonic-app/go-mpv v0.1.1-0.20250822102843-7a8cde5f5449 h1:UHIPI43
 github.com/supersonic-app/go-mpv v0.1.1-0.20250822102843-7a8cde5f5449/go.mod h1:1bQz6kBQumJopXEbkiqoLxIXLy7F7yWFBvknvpAtIC0=
 github.com/supersonic-app/go-subsonic v0.0.0-20260416152144-7a5f505a273c h1:wms3FvahSfcnacW2rs9L+vzJR8FmTE5xTrRgf3+k3eQ=
 github.com/supersonic-app/go-subsonic v0.0.0-20260416152144-7a5f505a273c/go.mod h1:ClhAgC2qobwH19D6kdwULLYSHlOmldDGkdu2G2Z0Ijo=
+github.com/thenktor/fyne/v2 v2.8.3-0.20261112084224-d22aa53a6afc h1:+MqBvNe5kLiDMCPsJt9ySFdgaBMdaRNsMDdm1ydfu1U=
+github.com/thenktor/fyne/v2 v2.8.3-0.20261112084224-d22aa53a6afc/go.mod h1:eXHJ/D9Y58UcDw7SkguadCRI64M4flXyjoMn827Q5SI=
 github.com/yuin/goldmark v1.8.2 h1:kEGpgqJXdgbkhcOgBxkC0X0PmoPG1ZyoZ117rDVp4zE=
 github.com/yuin/goldmark v1.8.2/go.mod h1:ip/1k0VRfGynBgxOz0yCqHrbZXhcjxyuS66Brc7iBKg=
 github.com/zalando/go-keyring v0.2.8 h1:6sD/Ucpl7jNq10rM2pgqTs0sZ9V3qMrqfIIy5YPccHs=

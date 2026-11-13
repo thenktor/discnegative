@@ -60,6 +60,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace fyne.io/fyne/v2 v2.8.2 => github.com/dweymouth/fyne/v2 v2.3.0-rc1.0.20260809142433-9ca176ed4373
+replace fyne.io/fyne/v2 => github.com/thenktor/fyne/v2 v2.8.3-0.20261112084224-d22aa53a6afc
 
 replace github.com/go-audio/wav v1.1.0 => github.com/dweymouth/go-wav v0.0.0-20250719173115-e60429a83eb0
