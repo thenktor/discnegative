@@ -48,7 +48,7 @@ bundledeps_macos_highsierra: package/darwin/DiscNegative.app
 	install_name_tool -change "/usr/local/opt/mpv/lib/libmpv.2.dylib" "@executable_path/../Frameworks/libmpv.2.dylib" "package/darwin/DiscNegative.app/Contents/MacOS/discnegative"
 
 .PHONY: bundledeps_iossimulator
-bundledeps_iossimulator: package/iossimulator/DiscNegative.app
+bundledeps_iossimulator: package/iossimulator/DiscNegative.app # only when using *media-kit/libmpv-darwin-build*, just for testing
 	mkdir -p package/iossimulator/DiscNegative.app/Frameworks
 	for name in $(IOS_XCFRAMEWORKS); do \
 		src="/opt/xcframework/$$name.xcframework/ios-arm64_x86_64-simulator/$$name.framework"; \
@@ -56,6 +56,16 @@ bundledeps_iossimulator: package/iossimulator/DiscNegative.app
 	done
 	install_name_tool -add_rpath '@executable_path/Frameworks' package/iossimulator/DiscNegative.app/main
 	codesign --force --deep --sign - --timestamp=none package/iossimulator/DiscNegative.app
+
+.PHONY: bundledeps_ios
+bundledeps_ios: package/ios/DiscNegative.app # only when using *media-kit/libmpv-darwin-build*, just for testing
+	mkdir -p package/ios/DiscNegative.app/Frameworks
+	for name in $(IOS_XCFRAMEWORKS); do \
+		src="/opt/xcframework/$$name.xcframework/ios-arm64/$$name.framework"; \
+		cp -a "$$src" "package/ios/DiscNegative.app/Frameworks/"; \
+	done
+	install_name_tool -add_rpath '@executable_path/Frameworks' package/ios/DiscNegative.app/main
+	codesign --force --deep --sign - --timestamp=none package/ios/DiscNegative.app
 
 .PHONY: zip_macos
 zip_macos: package/darwin/DiscNegative.zip
@@ -96,6 +106,8 @@ package/iossimulator/DiscNegative.app: $(SRCS) $(ICONS) # just for testing
 	mv DiscNegative.app package/iossimulator/
 
 package/ios/DiscNegative.app: $(SRCS) $(ICONS) # just for testing
+	# xcrun devicectl list devices
+	# xcrun devicectl device install app --device 12345678-0001112220ABCDEF package/ios/DiscNegative.app
 	@mkdir -p package/ios/
 	@echo "Packaging for ios..."
 	@rm -rf package/ios/DiscNegative.app
