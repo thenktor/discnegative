@@ -88,12 +88,12 @@ github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
 github.com/supersonic-app/fyne-lyrics v0.0.0-20250614151306-b1880a70a410 h1:wuDHCo6SU6r0KMm0EuI5FGVJCuLK4hcuPcMKmln8oCA=
 github.com/supersonic-app/fyne-lyrics v0.0.0-20250614151306-b1880a70a410/go.mod h1:XvGBPgXWkKrK+5OsoVkTcTZmwZac1Sj6miEn8q6uA20=
-github.com/supersonic-app/go-mpv v0.1.1-0.20250822102843-7a8cde5f5449 h1:UHIPI43VzyWuIF8z8WVMdjMsC/orZTZQJraD/Iv+ghw=
-github.com/supersonic-app/go-mpv v0.1.1-0.20250822102843-7a8cde5f5449/go.mod h1:1bQz6kBQumJopXEbkiqoLxIXLy7F7yWFBvknvpAtIC0=
 github.com/supersonic-app/go-subsonic v0.0.0-20260416152144-7a5f505a273c h1:wms3FvahSfcnacW2rs9L+vzJR8FmTE5xTrRgf3+k3eQ=
 github.com/supersonic-app/go-subsonic v0.0.0-20260416152144-7a5f505a273c/go.mod h1:ClhAgC2qobwH19D6kdwULLYSHlOmldDGkdu2G2Z0Ijo=
-github.com/thenktor/fyne/v2 v2.8.3-0.20261112084224-d22aa53a6afc h1:+MqBvNe5kLiDMCPsJt9ySFdgaBMdaRNsMDdm1ydfu1U=
-github.com/thenktor/fyne/v2 v2.8.3-0.20261112084224-d22aa53a6afc/go.mod h1:eXHJ/D9Y58UcDw7SkguadCRI64M4flXyjoMn827Q5SI=
+github.com/thenktor/fyne/v2 v2.8.3-0.20261113114500-0cf4b551cb27 h1:Y1uC1/BqMvgjzc4+TPG7yeR5UKSuAZrZjKqKoWl7FkQ=
+github.com/thenktor/fyne/v2 v2.8.3-0.20261113114500-0cf4b551cb27/go.mod h1:eXHJ/D9Y58UcDw7SkguadCRI64M4flXyjoMn827Q5SI=
+github.com/thenktor/go-mpv v0.0.0-20261113145855-f7fa187c3537 h1:S81/duBEu327EnllepcUmxlciWc+XItkM4xncl48m0A=
+github.com/thenktor/go-mpv v0.0.0-20261113145855-f7fa187c3537/go.mod h1:1bQz6kBQumJopXEbkiqoLxIXLy7F7yWFBvknvpAtIC0=
 github.com/yuin/goldmark v1.8.2 h1:kEGpgqJXdgbkhcOgBxkC0X0PmoPG1ZyoZ117rDVp4zE=
 github.com/yuin/goldmark v1.8.2/go.mod h1:ip/1k0VRfGynBgxOz0yCqHrbZXhcjxyuS66Brc7iBKg=
 github.com/zalando/go-keyring v0.2.8 h1:6sD/Ucpl7jNq10rM2pgqTs0sZ9V3qMrqfIIy5YPccHs=
