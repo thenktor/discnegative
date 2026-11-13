@@ -2,6 +2,8 @@ NAME := $(shell basename $(shell go list -m))
 SRCS := $(wildcard *.go) $(wildcard */*.go) $(shell find backend/) $(shell find ui/) $(shell find res/) go.mod
 ICONS := res/appicon.png res/appicon-256.png
 
+IOS_XCFRAMEWORKS := Avcodec Avfilter Avformat Avutil Mbedcrypto Mbedtls Mbedx509 Mpv Swresample Swscale
+
 .PHONY: build
 build: bin/${NAME}
 
@@ -29,21 +31,31 @@ bin/${NAME}: $(SRCS) $(ICONS)
 package_macos: package/darwin/DiscNegative.app
 
 .PHONY: bundledeps_macos_homebrew
-bundledeps_macos_homebrew:
-	dylibbundler -od -b -x ./DiscNegative.app/Contents/MacOS/supersonic -d ./DiscNegative.app/Contents/Frameworks/ -p @executable_path/../Frameworks/
+bundledeps_macos_homebrew: package/darwin/DiscNegative.app
+	dylibbundler -od -b -x package/darwin/DiscNegative.app/Contents/MacOS/discnegative -d package/darwin/DiscNegative.app/Contents/Frameworks/ -p @executable_path/../Frameworks/
 	./scripts/copy_python_dep_osx.sh
-	codesign --force --deep --preserve-metadata=entitlements,requirements,flags,runtime --sign - "./DiscNegative.app/Contents/MacOS/supersonic"
+	codesign --force --deep --preserve-metadata=entitlements,requirements,flags,runtime --sign - "package/darwin/DiscNegative.app/Contents/MacOS/discnegative"
 
 .PHONY: bundledeps_macos_macports
-bundledeps_macos_macports:
-	dylibbundler -od -b -x ./DiscNegative.app/Contents/MacOS/supersonic -d ./DiscNegative.app/Contents/Frameworks/ -p @executable_path/../Frameworks/
-	codesign --force --deep --preserve-metadata=entitlements,requirements,flags,runtime --sign - "./DiscNegative.app/Contents/MacOS/supersonic"
+bundledeps_macos_macports: package/darwin/DiscNegative.app
+	dylibbundler -od -b -x package/darwin/DiscNegative.app/Contents/MacOS/discnegative -d package/darwin/DiscNegative.app/Contents/Frameworks/ -p @executable_path/../Frameworks/
+	codesign --force --deep --preserve-metadata=entitlements,requirements,flags,runtime --sign - "package/darwin/DiscNegative.app/Contents/MacOS/discnegative"
 
 .PHONY: bundledeps_macos_highsierra
-bundledeps_macos_highsierra:
-	mkdir ./DiscNegative.app/Contents/Frameworks
-	cp -R res/libs/mac_x64/mpv/* ./DiscNegative.app/Contents/Frameworks
-	install_name_tool -change "/usr/local/opt/mpv/lib/libmpv.2.dylib" "@executable_path/../Frameworks/libmpv.2.dylib" "./DiscNegative.app/Contents/MacOS/supersonic"
+bundledeps_macos_highsierra: package/darwin/DiscNegative.app
+	mkdir package/darwin/DiscNegative.app/Contents/Frameworks
+	cp -R res/libs/mac_x64/mpv/* package/darwin/DiscNegative.app/Contents/Frameworks
+	install_name_tool -change "/usr/local/opt/mpv/lib/libmpv.2.dylib" "@executable_path/../Frameworks/libmpv.2.dylib" "package/darwin/DiscNegative.app/Contents/MacOS/discnegative"
+
+.PHONY: bundledeps_iossimulator
+bundledeps_iossimulator: package/iossimulator/DiscNegative.app
+	mkdir -p package/iossimulator/DiscNegative.app/Frameworks
+	for name in $(IOS_XCFRAMEWORKS); do \
+		src="/opt/xcframework/$$name.xcframework/ios-arm64_x86_64-simulator/$$name.framework"; \
+		cp -a "$$src" "package/iossimulator/DiscNegative.app/Frameworks/"; \
+	done
+	install_name_tool -add_rpath '@executable_path/Frameworks' package/iossimulator/DiscNegative.app/main
+	codesign --force --deep --sign - --timestamp=none package/iossimulator/DiscNegative.app
 
 .PHONY: zip_macos
 zip_macos: package/darwin/DiscNegative.zip
