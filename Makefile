@@ -1,5 +1,5 @@
 NAME := $(shell basename $(shell go list -m))
-SRCS := $(wildcard *.go) $(wildcard */*.go) $(shell find backend/) $(shell find ui/) $(shell find res/)
+SRCS := $(wildcard *.go) $(wildcard */*.go) $(shell find backend/) $(shell find ui/) $(shell find res/) go.mod
 ICONS := res/appicon.png res/appicon-256.png
 
 .PHONY: build
