@@ -7,6 +7,14 @@ IOS_XCFRAMEWORKS := Avcodec Avfilter Avformat Avutil Mbedcrypto Mbedtls Mbedx509
 .PHONY: build
 build: bin/${NAME}
 
+UNAME_S := $(shell uname -s)
+
+ifeq ($(filter FreeBSD NetBSD,$(UNAME_S)),)
+TAGS := migrated_fynedo
+else
+TAGS := migrated_fynedo,x11
+endif
+
 bin/${NAME}: $(SRCS) $(ICONS)
 	@mkdir -p bin/
 	@echo "Building..."
