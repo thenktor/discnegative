@@ -97,8 +97,8 @@ func NewMainWindow(fyneApp fyne.App, appName, displayAppName, appVersion string,
 	m.Controller.ToastProvider = m.ToastOverlay
 
 	if runtime.GOOS == "darwin" {
-		// Fyne will extract out an "About" menu item and
-		// assign its action to the native Mac "About Supersonic" menu item
+		// Fyne will extract out the literal "About" menu item and
+		// assign its action to the native Mac "About DiscNegative" menu item
 		m.Window.SetMainMenu(fyne.NewMainMenu(
 			fyne.NewMenu("File", /*name doesn't matter*/
 				fyne.NewMenuItem("About", func() {
@@ -153,7 +153,7 @@ func NewMainWindow(fyneApp fyne.App, appName, displayAppName, appVersion string,
 		}()
 	})
 	m.Toolbar.AddSettingsMenuItem(lang.L("Settings")+"...", theme.SettingsIcon(), m.showSettingsDialog)
-	m.Toolbar.AddSettingsMenuItem(lang.L("About")+"...", theme.InfoIcon(), m.Controller.ShowAboutDialog)
+	m.Toolbar.AddSettingsMenuItem(lang.L("About")+" "+res.DisplayName+"...", theme.InfoIcon(), m.Controller.ShowAboutDialog)
 	m.Toolbar.DisableNavigationButtons()
 	m.addShortcuts()
 
