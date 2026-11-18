@@ -92,8 +92,8 @@ github.com/supersonic-app/go-subsonic v0.0.0-20260416152144-7a5f505a273c h1:wms3
 github.com/supersonic-app/go-subsonic v0.0.0-20260416152144-7a5f505a273c/go.mod h1:ClhAgC2qobwH19D6kdwULLYSHlOmldDGkdu2G2Z0Ijo=
 github.com/thenktor/fyne/v2 v2.8.3-0.20261113114500-0cf4b551cb27 h1:Y1uC1/BqMvgjzc4+TPG7yeR5UKSuAZrZjKqKoWl7FkQ=
 github.com/thenktor/fyne/v2 v2.8.3-0.20261113114500-0cf4b551cb27/go.mod h1:eXHJ/D9Y58UcDw7SkguadCRI64M4flXyjoMn827Q5SI=
-github.com/thenktor/go-mpv v0.0.0-20261117155625-e8d768b073db h1:l+WmpLffFNyU9w352kVnwF002nNM/Lnc6OPQOh0QwVE=
-github.com/thenktor/go-mpv v0.0.0-20261117155625-e8d768b073db/go.mod h1:1bQz6kBQumJopXEbkiqoLxIXLy7F7yWFBvknvpAtIC0=
+github.com/thenktor/go-mpv v0.0.0-20261118081215-ed332d8df613 h1:+PAvZKOGro7ckyw8u1z/hmwC5aG2g664tsaqbJcGmlE=
+github.com/thenktor/go-mpv v0.0.0-20261118081215-ed332d8df613/go.mod h1:1bQz6kBQumJopXEbkiqoLxIXLy7F7yWFBvknvpAtIC0=
 github.com/yuin/goldmark v1.8.2 h1:kEGpgqJXdgbkhcOgBxkC0X0PmoPG1ZyoZ117rDVp4zE=
 github.com/yuin/goldmark v1.8.2/go.mod h1:ip/1k0VRfGynBgxOz0yCqHrbZXhcjxyuS66Brc7iBKg=
 github.com/zalando/go-keyring v0.2.8 h1:6sD/Ucpl7jNq10rM2pgqTs0sZ9V3qMrqfIIy5YPccHs=
