@@ -20,12 +20,26 @@ bin/${NAME}: $(SRCS) $(ICONS)
 	@echo "Building..."
 	go build -tags $(TAGS) -ldflags "-s -w" -o bin/${NAME}
 
-# dylibbundler doesn't seem to pick up on the Python framework dependency,
-# so the last 3 cmds move it over manually. This is a bit fragile though
-# since it assumes a specific location and version of the dependency
 .PHONY: package_macos
 package_macos: package/darwin/DiscNegative.app
 
+.PHONY: zip_macos
+zip_macos: package/darwin/DiscNegative.zip
+
+.PHONY: package_windows
+package_windows:
+	fyne package -os windows -tags migrated_fynedo -release
+
+.PHONY: package_linux
+package_linux:
+	fyne package -os linux -tags migrated_fynedo -release
+
+.PHONY: package_freebsd
+package_freebsd: package/freebsd/DiscNegative.tar.xz
+
+# dylibbundler doesn't seem to pick up on the Python framework dependency,
+# so the last 3 cmds move it over manually. This is a bit fragile though
+# since it assumes a specific location and version of the dependency
 .PHONY: bundledeps_macos_homebrew
 bundledeps_macos_homebrew: package/darwin/DiscNegative.app
 	dylibbundler -od -b -x package/darwin/DiscNegative.app/Contents/MacOS/discnegative -d package/darwin/DiscNegative.app/Contents/Frameworks/ -p @executable_path/../Frameworks/
@@ -63,21 +77,6 @@ bundledeps_ios: package/ios/DiscNegative.app # only when using *media-kit/libmpv
 	install_name_tool -add_rpath '@executable_path/Frameworks' package/ios/DiscNegative.app/main
 	codesign --force --deep --sign - --timestamp=none package/ios/DiscNegative.app
 
-.PHONY: zip_macos
-zip_macos: package/darwin/DiscNegative.zip
-
-.PHONY: package_windows
-package_windows:
-	fyne package -os windows -tags migrated_fynedo -release
-
-.PHONY: package_linux
-package_linux:
-	fyne package -os linux -tags migrated_fynedo -release
-
-.PHONY: package_freebsd
-package_freebsd:
-	fyne package -os freebsd -tags migrated_fynedo,x11 -release
-
 package/darwin/DiscNegative.app: $(SRCS) $(ICONS)
 	@mkdir -p package/darwin/
 	@echo "Packaging for darwin..."
@@ -109,6 +108,13 @@ package/ios/DiscNegative.app: $(SRCS) $(ICONS) # just for testing
 	@rm -rf package/ios/DiscNegative.app
 	IPHONEOS_DEPLOYMENT_TARGET=15.0 fyne package -os ios -tags migrated_fynedo -release
 	mv DiscNegative.app package/ios/
+
+package/freebsd/DiscNegative.tar.xz: $(SRCS) $(ICONS)
+	@mkdir -p package/freebsd/
+	@echo "Packaging for freebsd..."
+	@rm -rf package/freebsd/DiscNegative.tar.xz
+	fyne package -os freebsd -tags migrated_fynedo,x11 -release
+	mv DiscNegative.tar.xz package/freebsd/
 
 res/appicon.png: res/appicon.svg
 	magick -background none "res/appicon.svg[1024x1024]" -define png:compression-level=9 "res/appicon.png" 2>/dev/null
