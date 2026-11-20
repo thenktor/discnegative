@@ -2,7 +2,8 @@
 Icon = "res/appicon.png"
 Name = "DiscNegative"
 ID = "io.github.thenktor.discnegative"
-Version = "0.1.0"
+Version = "@APP_VERSION@"
+Build = @APP_BUILD@
 
 [LinuxAndBSD]
 Categories = ["Audio", "AudioVideo"]

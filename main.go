@@ -7,7 +7,8 @@ import (
 	"os"
 	"runtime"
 	"slices"
-	
+
+	"codeberg.org/unixery/buildinfo"
 
 	"github.com/thenktor/discnegative/backend"
 	
@@ -29,7 +30,7 @@ func main() {
 	// parse cmd line flags - see backend/cmdlineoptions.go
 	flag.Parse()
 	if *backend.FlagVersion {
-		fmt.Println(res.AppVersion)
+		fmt.Printf("%s %s (git sha %s)\n", res.AppName, res.AppVersion, buildinfo.GitSha)
 		return
 	}
 	if *backend.FlagHelp {

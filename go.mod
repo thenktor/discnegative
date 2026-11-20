@@ -1,8 +1,9 @@
 module github.com/thenktor/discnegative
 
-go 1.24.0
+go 1.27.1
 
 require (
+	codeberg.org/unixery/buildinfo v0.3.0
 	fyne.io/fyne/v2 v2.8.2
 	github.com/20after4/configdir v0.1.1
 	github.com/Microsoft/go-winio v0.6.2

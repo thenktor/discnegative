@@ -1,3 +1,5 @@
+codeberg.org/unixery/buildinfo v0.3.0 h1:TJZLBNIeBcp3MpazYe4zpOpDCdqb4RqID+pZf/Ke/c0=
+codeberg.org/unixery/buildinfo v0.3.0/go.mod h1:6lFhXOPI6TBBiJh08CFoGnI02a7imWeHh8xmvqxXzLM=
 fyne.io/systray v1.12.3-0.20260810170012-af4e8e793ec4 h1:149/+Wa5EsLLXfyj2pdTmvnQf2VIlgCIwSjcCTHYhIo=
 fyne.io/systray v1.12.3-0.20260810170012-af4e8e793ec4/go.mod h1:RVwqP9nYMo7h5zViCBHri2FgjXF7H2cub7MAq4NSoLs=
 github.com/20after4/configdir v0.1.1 h1:ylL5dO+aGxBV4jDtG9Ej9hZfeE8Fw9jULQVq0N+ErJ8=
