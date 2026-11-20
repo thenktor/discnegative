@@ -41,3 +41,6 @@ go.work
 
 # Platform specific metadata files
 .DS_Store
+
+# Generated from FyneApp.toml.template by the Makefile
+FyneApp.toml

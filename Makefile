@@ -20,22 +20,27 @@ bin/${NAME}: $(SRCS) $(ICONS)
 	@echo "Building..."
 	go build -tags $(TAGS) -ldflags "-s -w" -o bin/${NAME}
 
+# FyneApp.toml is generated from the template (it is not tracked by git, since
+# tools like `fyne package` modify it, e.g. by incrementing Build)
+FyneApp.toml: FyneApp.toml.template
+	cp FyneApp.toml.template FyneApp.toml
+
 .PHONY: package_macos
-package_macos: package/darwin/DiscNegative.app
+package_macos: FyneApp.toml package/darwin/DiscNegative.app
 
 .PHONY: zip_macos
-zip_macos: package/darwin/DiscNegative.zip
+zip_macos: FyneApp.toml package/darwin/DiscNegative.zip
 
 .PHONY: package_windows
-package_windows:
+package_windows: FyneApp.toml
 	fyne package -os windows -tags migrated_fynedo -release
 
 .PHONY: package_linux
-package_linux:
+package_linux: FyneApp.toml
 	fyne package -os linux -tags migrated_fynedo -release
 
 .PHONY: package_freebsd
-package_freebsd: package/freebsd/DiscNegative.tar.xz
+package_freebsd: FyneApp.toml package/freebsd/DiscNegative.tar.xz
 
 # dylibbundler doesn't seem to pick up on the Python framework dependency,
 # so the last 3 cmds move it over manually. This is a bit fragile though
@@ -77,7 +82,7 @@ bundledeps_ios: package/ios/DiscNegative.app # only when using *media-kit/libmpv
 	install_name_tool -add_rpath '@executable_path/Frameworks' package/ios/DiscNegative.app/main
 	codesign --force --deep --sign - --timestamp=none package/ios/DiscNegative.app
 
-package/darwin/DiscNegative.app: $(SRCS) $(ICONS)
+package/darwin/DiscNegative.app: FyneApp.toml $(SRCS) $(ICONS)
 	@mkdir -p package/darwin/
 	@echo "Packaging for darwin..."
 	@rm -rf package/darwin/DiscNegative.app
@@ -87,7 +92,7 @@ package/darwin/DiscNegative.app: $(SRCS) $(ICONS)
 package/darwin/DiscNegative.zip: package/darwin/DiscNegative.app
 	@cd package/darwin/ && zip --symlinks -r DiscNegative.zip DiscNegative.app/
 
-package/iossimulator/DiscNegative.app: $(SRCS) $(ICONS) # just for testing
+package/iossimulator/DiscNegative.app: FyneApp.toml $(SRCS) $(ICONS) # just for testing
 	# run the app on macOS:
 	# xcrun simctl list devices available
 	# xcrun simctl boot "iPad Air 11-inch (M4)"
@@ -100,7 +105,7 @@ package/iossimulator/DiscNegative.app: $(SRCS) $(ICONS) # just for testing
 	IPHONEOS_DEPLOYMENT_TARGET=15.0 fyne package -os iossimulator -tags migrated_fynedo,iossimulator
 	mv DiscNegative.app package/iossimulator/
 
-package/ios/DiscNegative.app: $(SRCS) $(ICONS) # just for testing
+package/ios/DiscNegative.app: FyneApp.toml $(SRCS) $(ICONS) # just for testing
 	# xcrun devicectl list devices
 	# xcrun devicectl device install app --device 12345678-0001112220ABCDEF package/ios/DiscNegative.app
 	@mkdir -p package/ios/
@@ -109,7 +114,7 @@ package/ios/DiscNegative.app: $(SRCS) $(ICONS) # just for testing
 	IPHONEOS_DEPLOYMENT_TARGET=15.0 fyne package -os ios -tags migrated_fynedo -release
 	mv DiscNegative.app package/ios/
 
-package/freebsd/DiscNegative.tar.xz: $(SRCS) $(ICONS)
+package/freebsd/DiscNegative.tar.xz: FyneApp.toml $(SRCS) $(ICONS)
 	@mkdir -p package/freebsd/
 	@echo "Packaging for freebsd..."
 	@rm -rf package/freebsd/DiscNegative.tar.xz
@@ -132,3 +137,4 @@ clean:
 	rm -rf bin/
 	rm -rf package/
 	rm -rf DiscNegative.app DiscNegative.zip DiscNegative.tar.xz
+	rm -f FyneApp.toml
