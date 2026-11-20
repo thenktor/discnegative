@@ -31,8 +31,8 @@ endif
 
 # Package metadata version. `git describe` yields values like v1.2.3-4-gabcde,
 # which fyne rejects, so anything but a plain tag falls back to 0.0.0.
-APP_VERSION := $(firstword $(subst -, ,$(patsubst v%,%,${GIT_TAG})))
-ifneq (,$(or $(filter n/a,${APP_VERSION}),$(if ${APP_VERSION},,x)))
+APP_VERSION := $(firstword $(subst -, ,$(patsubst v%,%,$(GIT_TAG))))
+ifneq (,$(or $(filter n/a,$(APP_VERSION)),$(if $(APP_VERSION),,x)))
 APP_VERSION := 0.0.0
 endif
 
@@ -40,17 +40,17 @@ endif
 # the commit count only grows, which is what e.g. macOS expects for bundle
 # build numbers.
 APP_BUILD := $(shell git rev-list --count HEAD 2>/dev/null)
-ifeq (${APP_BUILD},)
+ifeq ($(APP_BUILD),)
 APP_BUILD := 1
 endif
 
 # Linker flags that embed the git metadata into the binary.
-GO_LDFLAGS := -X '${BUILDINFO}.GitSha=${GIT_SHA}' -X '${BUILDINFO}.GitTag=${GIT_TAG}' -s -w
+GO_LDFLAGS := -X '$(BUILDINFO).GitSha=$(GIT_SHA)' -X '$(BUILDINFO).GitTag=$(GIT_TAG)' -s -w
 # `fyne package` builds the binary itself and only picks up linker flags from
 # GOFLAGS. Every -X has to be a separate "-ldflags=" field inside GOFLAGS,
 # because fyne reads them from there and joins them again.
-FYNE_GOFLAGS := -ldflags=-X=${BUILDINFO}.GitSha=${GIT_SHA} -ldflags=-X=${BUILDINFO}.GitTag=${GIT_TAG}
-FYNE := GOFLAGS="${FYNE_GOFLAGS}" fyne
+FYNE_GOFLAGS := -ldflags=-X=$(BUILDINFO).GitSha=$(GIT_SHA) -ldflags=-X=$(BUILDINFO).GitTag=$(GIT_TAG)
+FYNE := GOFLAGS="$(FYNE_GOFLAGS)" fyne
 
 # The binaries embed GIT_SHA/GIT_TAG via ldflags, but make only compares
 # file mtimes, so a commit or tag alone would not trigger a rebuild.
@@ -70,13 +70,13 @@ GIT_STATE := bin/.git-state
 .PHONY: git-state
 git-state:
 
-${GIT_STATE}: git-state
+$(GIT_STATE): git-state
 	@mkdir -p bin
-	@echo "${GIT_SHA} ${GIT_TAG}" > ${GIT_STATE}.tmp
-	@if cmp -s ${GIT_STATE}.tmp ${GIT_STATE} 2>/dev/null; then \
-		rm -f ${GIT_STATE}.tmp; \
+	@echo "$(GIT_SHA) $(GIT_TAG)" > $(GIT_STATE).tmp
+	@if cmp -s $(GIT_STATE).tmp $(GIT_STATE) 2>/dev/null; then \
+		rm -f $(GIT_STATE).tmp; \
 	else \
-		mv ${GIT_STATE}.tmp ${GIT_STATE}; \
+		mv $(GIT_STATE).tmp $(GIT_STATE); \
 	fi
 
 # Print the package version derived from the latest git tag (APP_VERSION
@@ -87,7 +87,7 @@ print-version:
 	@echo "$(APP_VERSION)"
 
 .PHONY: build
-build: bin/${NAME}
+build: bin/$(NAME)
 
 UNAME_S := $(shell uname -s)
 
@@ -97,15 +97,15 @@ else
 TAGS := migrated_fynedo,x11
 endif
 
-bin/${NAME}: $(SRCS) $(ICONS) ${GIT_STATE}
+bin/$(NAME): $(SRCS) $(ICONS) $(GIT_STATE)
 	@mkdir -p bin/
 	@echo "Building..."
-	go build -tags $(TAGS) -ldflags "${GO_LDFLAGS}" -o bin/${NAME}
+	go build -tags $(TAGS) -ldflags "$(GO_LDFLAGS)" -o bin/$(NAME)
 
 # FyneApp.toml is generated from the template (it is not tracked by git, since
 # tools like `fyne package` modify it, e.g. by incrementing Build). Version and
 # build number come from the git state, so packaged builds follow new tags.
-FyneApp.toml: FyneApp.toml.template ${GIT_STATE}
+FyneApp.toml: FyneApp.toml.template $(GIT_STATE)
 	sed -e 's/@APP_VERSION@/$(APP_VERSION)/' -e 's/@APP_BUILD@/$(APP_BUILD)/' FyneApp.toml.template > FyneApp.toml
 
 .PHONY: package_macos
@@ -165,7 +165,7 @@ bundledeps_ios: package/ios/DiscNegative.app # only when using *media-kit/libmpv
 	install_name_tool -add_rpath '@executable_path/Frameworks' package/ios/DiscNegative.app/main
 	codesign --force --deep --sign - --timestamp=none package/ios/DiscNegative.app
 
-package/darwin/DiscNegative.app: FyneApp.toml $(SRCS) $(ICONS) ${GIT_STATE}
+package/darwin/DiscNegative.app: FyneApp.toml $(SRCS) $(ICONS) $(GIT_STATE)
 	@mkdir -p package/darwin/
 	@echo "Packaging for darwin (version $(APP_VERSION), build $(APP_BUILD))..."
 	@rm -rf package/darwin/DiscNegative.app
@@ -175,7 +175,7 @@ package/darwin/DiscNegative.app: FyneApp.toml $(SRCS) $(ICONS) ${GIT_STATE}
 package/darwin/DiscNegative.zip: package/darwin/DiscNegative.app
 	@cd package/darwin/ && zip --symlinks -r DiscNegative.zip DiscNegative.app/
 
-package/iossimulator/DiscNegative.app: FyneApp.toml $(SRCS) $(ICONS) ${GIT_STATE} # just for testing
+package/iossimulator/DiscNegative.app: FyneApp.toml $(SRCS) $(ICONS) $(GIT_STATE) # just for testing
 	# run the app on macOS:
 	# xcrun simctl list devices available
 	# xcrun simctl boot "iPad Air 11-inch (M4)"
@@ -188,7 +188,7 @@ package/iossimulator/DiscNegative.app: FyneApp.toml $(SRCS) $(ICONS) ${GIT_STATE
 	IPHONEOS_DEPLOYMENT_TARGET=15.0 $(FYNE) package -os iossimulator -tags migrated_fynedo,iossimulator
 	mv DiscNegative.app package/iossimulator/
 
-package/ios/DiscNegative.app: FyneApp.toml $(SRCS) $(ICONS) ${GIT_STATE} # just for testing
+package/ios/DiscNegative.app: FyneApp.toml $(SRCS) $(ICONS) $(GIT_STATE) # just for testing
 	# xcrun devicectl list devices
 	# xcrun devicectl device install app --device 12345678-0001112220ABCDEF package/ios/DiscNegative.app
 	@mkdir -p package/ios/
@@ -197,7 +197,7 @@ package/ios/DiscNegative.app: FyneApp.toml $(SRCS) $(ICONS) ${GIT_STATE} # just 
 	IPHONEOS_DEPLOYMENT_TARGET=15.0 $(FYNE) package -os ios -tags migrated_fynedo -release
 	mv DiscNegative.app package/ios/
 
-package/freebsd/DiscNegative.tar.xz: FyneApp.toml $(SRCS) $(ICONS) ${GIT_STATE}
+package/freebsd/DiscNegative.tar.xz: FyneApp.toml $(SRCS) $(ICONS) $(GIT_STATE)
 	@mkdir -p package/freebsd/
 	@echo "Packaging for freebsd (version $(APP_VERSION), build $(APP_BUILD))..."
 	@rm -rf package/freebsd/DiscNegative.tar.xz
