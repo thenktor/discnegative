@@ -141,13 +141,9 @@ package_linux: FyneApp.toml
 .PHONY: package_freebsd
 package_freebsd: FyneApp.toml package/freebsd/DiscNegative.tar.xz
 
-# dylibbundler doesn't seem to pick up on the Python framework dependency,
-# so the last 3 cmds move it over manually. This is a bit fragile though
-# since it assumes a specific location and version of the dependency
 .PHONY: bundledeps_macos_homebrew
 bundledeps_macos_homebrew: package/darwin/DiscNegative.app
 	dylibbundler -od -b -x package/darwin/DiscNegative.app/Contents/MacOS/discnegative -d package/darwin/DiscNegative.app/Contents/Frameworks/ -p @executable_path/../Frameworks/
-	./scripts/copy_python_dep_osx.sh
 	codesign --force --deep --preserve-metadata=entitlements,requirements,flags,runtime --sign - "package/darwin/DiscNegative.app/Contents/MacOS/discnegative"
 
 .PHONY: bundledeps_macos_macports
