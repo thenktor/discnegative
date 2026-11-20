@@ -24,7 +24,10 @@ jobs:
             wget
             zip
             p7zip
+      # fetch all tags so that `make print-version` (git describe --tags) works
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - name: Set up Go
         uses: actions/setup-go@v7
         with:
@@ -47,10 +50,14 @@ jobs:
       - name: Generate zip bundle
         run: >
           zip Supersonic_windows_x64.zip Supersonic.exe libmpv-2.dll SMTC.dll
+      - name: Compute app version from git tag
+        run: echo "APP_VERSION=$(make -s print-version)" >> "$GITHUB_ENV"
       - name: Generate installer
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.9
         with:
           path: win_inno_installscript.iss
+          # embeds the git-tag version into the installer (see win_inno_installscript.iss)
+          options: /DMyAppVersion=${{ env.APP_VERSION }}
       - name: Rename installer
         run: cp Output/supersonic-installer.exe Supersonic_windows_x64_installer.exe
       - name: Upload zip

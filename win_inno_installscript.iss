@@ -2,7 +2,12 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Supersonic"
-#define MyAppVersion "0.22.1"
+; The version is normally passed from CI via ISCC /DMyAppVersion=<version>
+; (derived from the latest git tag, see Makefile target print-version and
+; .github/workflows). The fallback is used for local/manual compiles.
+#ifndef MyAppVersion
+#define MyAppVersion "0.0.0"
+#endif
 #define MyAppPublisher "Drew Weymouth"
 #define MyAppURL "https://github.com/supersonic-app/supersonic"
 #define MyAppExeName "Supersonic.exe"

@@ -79,6 +79,13 @@ ${GIT_STATE}: git-state
 		mv ${GIT_STATE}.tmp ${GIT_STATE}; \
 	fi
 
+# Print the package version derived from the latest git tag (APP_VERSION
+# above), e.g. for passing to the Inno Setup installer via ISCC /DMyAppVersion
+# in CI (see win_inno_installscript.iss and .github/workflows).
+.PHONY: print-version
+print-version:
+	@echo "$(APP_VERSION)"
+
 .PHONY: build
 build: bin/${NAME}
 
