@@ -63,8 +63,7 @@ Supersonic is available in the AUR and can be built either manually with `makepk
 * clone the repo, CD into the repo root, and run ``make build``
 * (note that the first build will take some time as it will download and build the UI library)
 * run ``make package_macos`` to generate the .app bundle
-* **If** you are on Mac OS **High Sierra** through **Catalina**, run ``make bundledeps_macos_highsierra`` and you are done! Otherwise, continue reaading.
-* At this point, the Supersonic.app bundle can be copied to Applications and it will run on your machine, but it depends on the brew installation of mpv
+* At this point, the DiscNegative.app bundle can be copied to Applications and it will run on your machine, but it depends on the brew installation of mpv
 * To copy the dependencies into the app bundle, and make it truly portable, run the appopriate command for your package manager:
   - **Homebrew**: ``make bundledeps_macos_homebrew``
   - **Macports**: ``make bundledeps_macos_macports``

@@ -103,116 +103,6 @@ jobs:
           name: DiscNegative_mac_arm64.zip
           path: DiscNegative_mac_arm64.zip
 
-  build-macos-x64:
-    name: Build macOS x64
-    runs-on: macos-15-intel
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v7
-      - name: Set up Xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: latest
-      - name: Set up Go
-        uses: actions/setup-go@v7
-        with:
-          go-version: 'stable'
-      - name: Install Dependencies
-        run: brew install --force mpv && brew install --force dylibbundler
-      - name: Setup path
-        run: export C_INCLUDE_PATH=/usr/local/include:/opt/homebrew/include:$C_INCLUDE_PATH && export LIBRARY_PATH=/usr/local/lib:/opt/homebrew/lib:$LIBRARY_PATH
-      - name: Install Fyne tool
-        run: go install fyne.io/fyne/v2/cmd/fyne@latest
-      - name: Build and package app bundles
-        run: >
-          make package_macos &&
-          make bundledeps_macos_homebrew && make zip_macos &&
-          mv package/darwin/DiscNegative.zip DiscNegative_mac_x64_BigSur+.zip
-      - name: Upload Big Sur+ package
-        uses: actions/upload-artifact@v7
-        with:
-          name: DiscNegative_mac_x64_BigSur+.zip
-          path: DiscNegative_mac_x64_BigSur+.zip
-
-  build-macos-legacy:
-    name: Build macOS legacy
-    runs-on: macos-15-intel
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v7
-      - name: Set up Xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: latest
-      - name: Set up Go
-        uses: actions/setup-go@v7
-        with:
-          go-version: '1.24'
-      - name: Install Dependencies
-        run: brew install --force mpv && brew install --force dylibbundler
-      - name: Setup path
-        run: export C_INCLUDE_PATH=/usr/local/include:/opt/homebrew/include:$C_INCLUDE_PATH && export LIBRARY_PATH=/usr/local/lib:/opt/homebrew/lib:$LIBRARY_PATH
-      - name: Install Fyne tool
-        run: go install fyne.io/fyne/v2/cmd/fyne@latest
-      - name: Build and package app bundles
-        run: >
-          make package_macos &&
-          make bundledeps_macos_highsierra && make zip_macos &&
-          mv package/darwin/DiscNegative.zip DiscNegative_mac_x64_HighSierra+.zip
-      - name: Upload High Sierra+ package
-        uses: actions/upload-artifact@v7
-        with:
-          name: DiscNegative_mac_x64_HighSierra+.zip
-          path: DiscNegative_mac_x64_HighSierra+.zip
-
-  build-ubuntu-22:
-    name: Build Ubuntu 22.04
-    runs-on: ubuntu-22.04
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v7
-      - name: Set up Go
-        uses: actions/setup-go@v7
-        with:
-          go-version: 'stable'
-      - name: Install dependencies
-        run: sudo apt update && sudo apt install -y libmpv-dev gcc libegl1-mesa-dev xorg-dev libwayland-dev libxkbcommon-dev
-      - name: Install Fyne tool
-        run: go install fyne.io/fyne/v2/cmd/fyne@latest
-      - name: Fyne package
-        run: make package_linux
-      - name: Rename artifact
-        run: mv DiscNegative.tar.xz DiscNegative_ubuntu22.04_x64.tar.xz
-      - name: Upload artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: DiscNegative_ubuntu22.04_x64.tar.xz
-          path: DiscNegative_ubuntu22.04_x64.tar.xz
-
-  build-ubuntu-24:
-    name: Build Ubuntu 24.04
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v7
-      - name: Set up Go
-        uses: actions/setup-go@v7
-        with:
-          go-version: 'stable'
-      - name: Install dependencies
-        run: sudo apt update && sudo apt install -y libmpv-dev gcc libegl1-mesa-dev xorg-dev libwayland-dev libxkbcommon-dev
-      - name: Install Fyne tool
-        run: go install fyne.io/fyne/v2/cmd/fyne@latest
-      - name: Fyne package
-        run: make package_linux
-      - name: Rename artifact
-        run: mv DiscNegative.tar.xz DiscNegative_ubuntu24.04_x64.tar.xz
-      - name: Upload artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: DiscNegative_ubuntu24.04_x64.tar.xz
-          path: DiscNegative_ubuntu24.04_x64.tar.xz
-
   build-appimage:
     name: Build AppImage
     runs-on: ubuntu-22.04
@@ -242,10 +132,8 @@ jobs:
     needs:
       # - build-windows
       - build-macos-arm64
-      - build-macos-x64
-      - build-macos-legacy
-      - build-ubuntu-22
-      - build-ubuntu-24
+      # - build-ubuntu-22
+      # - build-ubuntu-24
       - build-appimage
     runs-on: ubuntu-latest
     permissions:

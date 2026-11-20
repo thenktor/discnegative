@@ -155,12 +155,6 @@ bundledeps_macos_macports: package/darwin/DiscNegative.app
 	dylibbundler -od -b -x package/darwin/DiscNegative.app/Contents/MacOS/discnegative -d package/darwin/DiscNegative.app/Contents/Frameworks/ -p @executable_path/../Frameworks/
 	codesign --force --deep --preserve-metadata=entitlements,requirements,flags,runtime --sign - "package/darwin/DiscNegative.app/Contents/MacOS/discnegative"
 
-.PHONY: bundledeps_macos_highsierra
-bundledeps_macos_highsierra: package/darwin/DiscNegative.app
-	mkdir package/darwin/DiscNegative.app/Contents/Frameworks
-	cp -R res/libs/mac_x64/mpv/* package/darwin/DiscNegative.app/Contents/Frameworks
-	install_name_tool -change "/usr/local/opt/mpv/lib/libmpv.2.dylib" "@executable_path/../Frameworks/libmpv.2.dylib" "package/darwin/DiscNegative.app/Contents/MacOS/discnegative"
-
 .PHONY: bundledeps_iossimulator
 bundledeps_iossimulator: package/iossimulator/DiscNegative.app # only when using *media-kit/libmpv-darwin-build*, just for testing
 	mkdir -p package/iossimulator/DiscNegative.app/Frameworks
