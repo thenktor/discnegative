@@ -51,7 +51,7 @@ type AppConfig struct {
 	CustomLrcLibUrl             string
 	EnablePasswordStorage       bool
 	SkipSSLVerify               bool // Deprecated: use per-server SkipSSLVerify. Drop in future version.
-	EnqueueBatchSize            int
+	EnqueueBatchSize            int  // tracks appended when the play queue runs out (endless play), MinEnqueueBatchSize..MaxEnqueueBatchSize
 	Language                    string
 	DisableDPIDetection         bool
 	EnableAutoUpdateChecker     bool
@@ -207,7 +207,7 @@ func DefaultConfig(appVersionTag string) *Config {
 			ShowTrackChangeNotification:        false,
 			EnableLrcLib:                       true,
 			EnablePasswordStorage:              true,
-			EnqueueBatchSize:                   100,
+			EnqueueBatchSize:                   DefaultEnqueueBatchSize,
 			Language:                           "auto",
 			EnableAutoUpdateChecker:            true,
 			RequestTimeoutSeconds:              15,

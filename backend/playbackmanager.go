@@ -411,7 +411,7 @@ func (p *PlaybackManager) LoadTrackPaused(idx int, startTime float64) {
 
 func (p *PlaybackManager) PlayRandomSongs(genreName string) error {
 	return p.fetchAndPlayTracks(func() ([]*mediaprovider.Track, error) {
-		tr, err := p.engine.sm.Server.GetRandomTracks(genreName, p.appCfg.EnqueueBatchSize)
+		tr, err := p.engine.sm.Server.GetRandomTracks(genreName, RadioTrackCount)
 		if err != nil {
 			return nil, err
 		}
@@ -427,7 +427,7 @@ func (p *PlaybackManager) PlayRandomSongs(genreName string) error {
 
 func (p *PlaybackManager) PlaySimilarSongs(id string) error {
 	return p.fetchAndPlayTracks(func() ([]*mediaprovider.Track, error) {
-		return p.engine.sm.Server.GetSimilarTracks(id, p.appCfg.EnqueueBatchSize)
+		return p.engine.sm.Server.GetSimilarTracks(id, RadioTrackCount)
 	})
 }
 
@@ -669,8 +669,15 @@ const (
 	// candidates. The play queue grows indefinitely and is never trimmed, so
 	// recently played tracks must be tracked separately from the queue.
 	endlessPlayPlayedWindow = 500
-	// Batch size to use if EnqueueBatchSize is not configured.
-	endlessPlayDefaultBatchSize = 100
+	// DefaultEnqueueBatchSize is used if EnqueueBatchSize is not configured.
+	DefaultEnqueueBatchSize = 10
+	// Allowed range for the configurable Application.EnqueueBatchSize.
+	MinEnqueueBatchSize = 3
+	MaxEnqueueBatchSize = 100
+	// RadioTrackCount is the fixed number of tracks requested for the radio
+	// style features ("Play random", "Play song radio"), which are expected to
+	// fill the queue with many tracks. Intentionally not configurable.
+	RadioTrackCount = 100
 )
 
 // Snapshot of the state needed to fetch endless play tracks. It is created from
@@ -811,8 +818,9 @@ func (p *PlaybackManager) endlessPlaySnapshot(lastPlayed mediaprovider.MediaItem
 		queueGeneration: p.engine.getQueueGeneration(),
 	}
 	if snap.batchSize <= 0 {
-		snap.batchSize = endlessPlayDefaultBatchSize
+		snap.batchSize = DefaultEnqueueBatchSize
 	}
+	snap.batchSize = min(max(snap.batchSize, MinEnqueueBatchSize), MaxEnqueueBatchSize)
 
 	for i := nowPlayingIdx; i < queueLen; i++ {
 		snap.skipIDs[queue[i].Metadata().ID] = struct{}{}

@@ -355,7 +355,7 @@ func (c *Controller) ShowTrackInfoDialog(track *mediaprovider.Track) {
 }
 
 func (c *Controller) GetSongRadioTracks(sourceTrack *mediaprovider.Track) ([]*mediaprovider.Track, error) {
-	radioTracks, err := c.App.ServerManager.Server.GetSongRadio(sourceTrack.ID, 100)
+	radioTracks, err := c.App.ServerManager.Server.GetSongRadio(sourceTrack.ID, backend.RadioTrackCount)
 	if err != nil {
 		return nil, fmt.Errorf("error getting song radio: %s", err.Error())
 	}

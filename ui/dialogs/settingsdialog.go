@@ -2,6 +2,7 @@ package dialogs
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"os"
 	"slices"
@@ -422,6 +423,33 @@ func (s *SettingsDialog) createPlaybackTab(isLocalPlayer, isReplayGainPlayer boo
 		audioExclusive.Disable()
 		pauseFade.Disable()
 	}
+
+	// Batch size for endless play, i.e. the number of tracks appended when the
+	// play queue runs out of tracks (range backend.MinEnqueueBatchSize to
+	// backend.MaxEnqueueBatchSize).
+	batchSizeEntry := widgets.NewTextRestrictedEntry(func(curText, selText string, r rune) bool {
+		return unicode.IsDigit(r) && len(curText)-len(selText) < 3
+	})
+	batchSizeEntry.SetMinCharWidth(3)
+	batchSizeEntry.Validator = func(text string) error {
+		i, err := strconv.Atoi(text)
+		if err != nil || i < backend.MinEnqueueBatchSize || i > backend.MaxEnqueueBatchSize {
+			return errors.New(fmt.Sprintf(lang.L("must be between %d and %d"),
+				backend.MinEnqueueBatchSize, backend.MaxEnqueueBatchSize))
+		}
+		return nil
+	}
+	batchSizeEntry.OnChanged = func(text string) {
+		if i, err := strconv.Atoi(text); err == nil && i >= backend.MinEnqueueBatchSize && i <= backend.MaxEnqueueBatchSize {
+			s.config.Application.EnqueueBatchSize = i
+		}
+	}
+	initBatchSize := s.config.Application.EnqueueBatchSize
+	if initBatchSize <= 0 {
+		initBatchSize = backend.DefaultEnqueueBatchSize
+	}
+	initBatchSize = min(max(initBatchSize, backend.MinEnqueueBatchSize), backend.MaxEnqueueBatchSize)
+	batchSizeEntry.Text = strconv.Itoa(initBatchSize)
 	if !isReplayGainPlayer {
 		replayGainSelect.Disable()
 		preventClipping.Disable()
@@ -452,6 +480,11 @@ func (s *SettingsDialog) createPlaybackTab(isLocalPlayer, isReplayGainPlayer boo
 		container.NewBorder(nil, nil,
 			widget.NewLabel(lang.L("Skip tracks with keyword")), nil,
 			widget.NewEntryWithData(binding.BindString(&s.config.Playback.SkipKeywordWhenShuffling)),
+		),
+		container.NewBorder(nil, nil,
+			widget.NewLabel(fmt.Sprintf(lang.L("Tracks for endless play (%d-%d)"),
+				backend.MinEnqueueBatchSize, backend.MaxEnqueueBatchSize)), nil,
+			batchSizeEntry,
 		),
 	))
 }

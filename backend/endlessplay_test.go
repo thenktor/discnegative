@@ -199,6 +199,31 @@ func TestEndlessPlaySnapshot(t *testing.T) {
 			t.Fatalf("expected played window of %d tracks, got %d", endlessPlayPlayedWindow, len(snap.playedIDs))
 		}
 	})
+
+	t.Run("batch size is clamped to the allowed range", func(t *testing.T) {
+		queue := newQueue("a", "b")
+		for _, tc := range []struct {
+			configured int
+			expected   int
+		}{
+			{0, DefaultEnqueueBatchSize},
+			{MinEnqueueBatchSize - 1, MinEnqueueBatchSize},
+			{MinEnqueueBatchSize, MinEnqueueBatchSize},
+			{42, 42},
+			{MaxEnqueueBatchSize, MaxEnqueueBatchSize},
+			{MaxEnqueueBatchSize + 1, MaxEnqueueBatchSize},
+		} {
+			pm := newManager(queue, 1)
+			pm.appCfg.EnqueueBatchSize = tc.configured
+			snap := pm.endlessPlaySnapshot(nil, false)
+			if snap == nil {
+				t.Fatalf("configured %d: expected snapshot", tc.configured)
+			}
+			if snap.batchSize != tc.expected {
+				t.Fatalf("configured %d: expected batch size %d, got %d", tc.configured, tc.expected, snap.batchSize)
+			}
+		}
+	})
 }
 
 func trackIDs(tracks []*mediaprovider.Track) []string {
