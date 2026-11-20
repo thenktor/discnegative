@@ -64,12 +64,9 @@ jobs:
         run: >
           wget https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20260610/mpv-dev-x86_64-20260610-git-304426c.7z &&
           7z x mpv-dev-x86_64-20260610-git-304426c.7z
-      - name: Download smtc dll
-        run: >
-          wget https://github.com/supersonic-app/smtc-dll/releases/download/v0.1.2/SMTC.dll
       - name: Generate zip bundle
         run: >
-          zip DiscNegative_windows_x64.zip DiscNegative.exe libmpv-2.dll SMTC.dll
+          zip DiscNegative_windows_x64.zip DiscNegative.exe libmpv-2.dll
       - name: Compute app version from git tag
         run: echo "APP_VERSION=$(make -s print-version)" >> "$GITHUB_ENV"
       - name: Generate installer
