@@ -19,25 +19,12 @@ func NewWhatsNewDialog() *WhatsNewDialog {
 	return w
 }
 
-const donationTextTemplate = `Thank you for using Supersonic!
-If you're enjoying the app and want to [show your support](%s),
-donations are always appreciated and help motivate me to continue
-delivering new features and improvements!`
+const changelogTextTemplate = `The changes in this version are listed in the [commit history](%s).`
 
 func (w *WhatsNewDialog) CreateRenderer() fyne.WidgetRenderer {
-	donationPrompt := widget.NewRichTextFromMarkdown(fmt.Sprintf(donationTextTemplate, res.KofiURL))
-	donationPrompt.Wrapping = fyne.TextWrapWord
-	objects := container.NewVBox(donationPrompt)
-	if res.WhatsAdded != "" {
-		added := widget.NewRichTextFromMarkdown(res.WhatsAdded)
-		added.Wrapping = fyne.TextWrapWord
-		objects.Add(added)
-	}
-	if res.WhatsFixed != "" {
-		fixed := widget.NewRichTextFromMarkdown(res.WhatsFixed)
-		fixed.Wrapping = fyne.TextWrapWord
-		objects.Add(fixed)
-	}
+	changelogPrompt := widget.NewRichTextFromMarkdown(fmt.Sprintf(changelogTextTemplate, res.CommitsURL))
+	changelogPrompt.Wrapping = fyne.TextWrapWord
+	objects := container.NewVBox(changelogPrompt)
 
 	c := container.NewVScroll(objects)
 	return widget.NewSimpleRenderer(c)

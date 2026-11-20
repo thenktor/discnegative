@@ -13,8 +13,8 @@ const (
 	ConfigFile       = "config.toml"
 	GithubURL        = "https://github.com/thenktor/discnegative"
 	LatestReleaseURL = GithubURL + "/releases/latest"
-	KofiURL          = "https://ko-fi.com/dweymouth"
-	Copyright        = "Copyright © 2022–2026 Drew Weymouth and contributors"
+	CommitsURL       = GithubURL + "/commits/main/"
+	Copyright        = "Copyright © 2022–2026 Drew Weymouth and contributors, 2026 Thorsten Mühlfelder"
 )
 
 var (
@@ -38,15 +38,3 @@ func Version() string {
 	}
 	return buildinfo.GitTag
 }
-
-var (
-	WhatsAdded = `
-## Added
-* New AppName
-* Features removed
-* UI changes`
-
-	WhatsFixed = `
-## Fixed
-* none`
-)
