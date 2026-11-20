@@ -44,3 +44,5 @@ go.work
 
 # Generated from FyneApp.toml.template by the Makefile
 FyneApp.toml
+# Temporary file used when resetting the Build field after `fyne package`
+FyneApp.toml.tmp

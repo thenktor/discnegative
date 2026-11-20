@@ -108,6 +108,20 @@ bin/$(NAME): $(SRCS) $(ICONS) $(GIT_STATE)
 FyneApp.toml: FyneApp.toml.template $(GIT_STATE)
 	sed -e 's/@APP_VERSION@/$(APP_VERSION)/' -e 's/@APP_BUILD@/$(APP_BUILD)/' FyneApp.toml.template > FyneApp.toml
 
+# `fyne package` increments the Build field in FyneApp.toml itself, which would
+# leave a build number in the file that is out of sync with the git-derived
+# APP_BUILD (and would creep up on every packaging run). Reset the field right
+# after packaging. The file is only replaced when its content actually differs,
+# so the mtime stays untouched when nothing has to be restored.
+define restore_app_build
+	@sed 's/^Build = .*/Build = $(APP_BUILD)/' FyneApp.toml > FyneApp.toml.tmp
+	@if cmp -s FyneApp.toml.tmp FyneApp.toml; then \
+		rm -f FyneApp.toml.tmp; \
+	else \
+		mv FyneApp.toml.tmp FyneApp.toml; \
+	fi
+endef
+
 .PHONY: package_macos
 package_macos: FyneApp.toml package/darwin/DiscNegative.app
 
@@ -117,10 +131,12 @@ zip_macos: FyneApp.toml package/darwin/DiscNegative.zip
 .PHONY: package_windows
 package_windows: FyneApp.toml
 	$(FYNE) package -os windows -tags migrated_fynedo -release
+	$(restore_app_build)
 
 .PHONY: package_linux
 package_linux: FyneApp.toml
 	$(FYNE) package -os linux -tags migrated_fynedo -release
+	$(restore_app_build)
 
 .PHONY: package_freebsd
 package_freebsd: FyneApp.toml package/freebsd/DiscNegative.tar.xz
@@ -171,6 +187,8 @@ package/darwin/DiscNegative.app: FyneApp.toml $(SRCS) $(ICONS) $(GIT_STATE)
 	@rm -rf package/darwin/DiscNegative.app
 	MACOSX_DEPLOYMENT_TARGET=10.14.0 $(FYNE) package -os darwin -tags migrated_fynedo -release
 	mv DiscNegative.app package/darwin/
+	$(restore_app_build)
+	@touch package/darwin/DiscNegative.app
 
 package/darwin/DiscNegative.zip: package/darwin/DiscNegative.app
 	@cd package/darwin/ && zip --symlinks -r DiscNegative.zip DiscNegative.app/
@@ -187,6 +205,8 @@ package/iossimulator/DiscNegative.app: FyneApp.toml $(SRCS) $(ICONS) $(GIT_STATE
 	@rm -rf package/iossimulator/DiscNegative.app
 	IPHONEOS_DEPLOYMENT_TARGET=15.0 $(FYNE) package -os iossimulator -tags migrated_fynedo,iossimulator
 	mv DiscNegative.app package/iossimulator/
+	$(restore_app_build)
+	@touch package/iossimulator/DiscNegative.app
 
 package/ios/DiscNegative.app: FyneApp.toml $(SRCS) $(ICONS) $(GIT_STATE) # just for testing
 	# xcrun devicectl list devices
@@ -196,6 +216,8 @@ package/ios/DiscNegative.app: FyneApp.toml $(SRCS) $(ICONS) $(GIT_STATE) # just 
 	@rm -rf package/ios/DiscNegative.app
 	IPHONEOS_DEPLOYMENT_TARGET=15.0 $(FYNE) package -os ios -tags migrated_fynedo -release
 	mv DiscNegative.app package/ios/
+	$(restore_app_build)
+	@touch package/ios/DiscNegative.app
 
 package/freebsd/DiscNegative.tar.xz: FyneApp.toml $(SRCS) $(ICONS) $(GIT_STATE)
 	@mkdir -p package/freebsd/
@@ -203,6 +225,8 @@ package/freebsd/DiscNegative.tar.xz: FyneApp.toml $(SRCS) $(ICONS) $(GIT_STATE)
 	@rm -rf package/freebsd/DiscNegative.tar.xz
 	$(FYNE) package -os freebsd -tags migrated_fynedo,x11 -release
 	mv DiscNegative.tar.xz package/freebsd/
+	$(restore_app_build)
+	@touch package/freebsd/DiscNegative.tar.xz
 
 res/appicon.png: res/appicon.svg
 	magick -background none "res/appicon.svg[1024x1024]" -define png:compression-level=9 "res/appicon.png" 2>/dev/null
