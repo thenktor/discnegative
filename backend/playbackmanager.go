@@ -661,10 +661,10 @@ const (
 	// currently playing one gives the server a full track duration of lead time.
 	endlessPlayUpcomingTracks = 1
 	// Fallback trigger: seconds before the end of the current track.
-	endlessPlayTriggerSeconds = 30.0
+	endlessPlayTriggerSeconds = 60.0
 	// Minimum time between two (re-)attempts to fetch endless play tracks, so a
 	// failing/unreachable server is not hammered with requests.
-	endlessPlayRetryInterval = 15 * time.Second
+	endlessPlayRetryInterval = 10 * time.Second
 	// Number of already played tracks that are excluded from endless play
 	// candidates. The play queue grows indefinitely and is never trimmed, so
 	// recently played tracks must be tracked separately from the queue.
