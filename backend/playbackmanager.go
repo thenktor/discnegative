@@ -7,7 +7,8 @@ import (
 	"log"
 	"math/rand"
 	"runtime"
-	"slices"
+	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/charlievieth/strcase"
@@ -38,8 +39,17 @@ type PlaybackManager struct {
 	lastPlayTime  float64
 	lastPlayingID string
 
-	// whether endless play tracks are currently being fetched/enqueued
-	pendingEndlessPlay bool
+	// Mirrors cfg.EndlessPlay for lock-free reads from player and UI
+	// goroutines. cfg is only used for persisting the setting.
+	endlessPlay atomic.Bool
+
+	// Whether endless play tracks are currently being fetched/enqueued and when
+	// the last attempt happened. Guarded by endlessPlayMu, as endless play is
+	// triggered from several goroutines (time pos poller, player callbacks, UI).
+	endlessPlayMu          sync.Mutex
+	pendingEndlessPlay     bool
+	lastEndlessPlayAttempt time.Time
+
 	wasLoadTrackPaused bool
 
 	// current radio metadata
@@ -68,6 +78,7 @@ func NewPlaybackManager(
 		localPlayer: p,
 		cache:       c,
 	}
+	pm.endlessPlay.Store(playbackCfg.EndlessPlay)
 	pm.addOnTrackChangeHook()
 	go pm.runCmdQueue(ctx)
 	return pm
@@ -81,14 +92,44 @@ func (p *PlaybackManager) addOnTrackChangeHook() {
 	p.OnPlayTimeUpdate(func(curTime, totalTime float64, _ bool) {
 		p.lastPlayTime = curTime
 
-		// enqueue endless play tracks if enabled and nearing end of queue
-		if p.cfg.EndlessPlay && !p.pendingEndlessPlay && totalTime-curTime < 10.0 &&
-			p.NowPlayingIndex() == p.engine.getPlayQueueLength()-1 {
-			p.enqueueEndlessPlayTracks()
+		// Fallback trigger for endless play. The primary trigger is the
+		// onBeforeSongChange hook below, which requests more tracks as soon as
+		// the last track starts. This check only retries during the final
+		// seconds of the queue, e.g. after a failed fetch attempt.
+		if !p.endlessPlay.Load() || totalTime-curTime >= endlessPlayTriggerSeconds {
+			return
 		}
+		if p.engine.getPlayQueueLength()-1-p.NowPlayingIndex() > endlessPlayUpcomingTracks {
+			return
+		}
+		p.requestEndlessPlayTracks(nil, false)
 	})
 
+	// Primary trigger for endless play: request more tracks as soon as the
+	// queue is (nearly) exhausted. Doing this when the last track *starts*
+	// (instead of shortly before it ends) gives the server a full track
+	// duration to answer, which is essential for slow/remote servers.
+	p.OnBeforeSongChange(func(next mediaprovider.MediaItem) {
+		if next != nil || !p.endlessPlay.Load() {
+			return
+		}
+		p.requestEndlessPlayTracks(nil, false)
+	})
 
+	// If playback nevertheless ran out of tracks (e.g. the server was
+	// unreachable for a while), append tracks and resume playback automatically.
+	p.OnQueueFinished(func(lastPlayed mediaprovider.MediaItem) {
+		if !p.endlessPlay.Load() {
+			return
+		}
+		p.requestEndlessPlayTracks(lastPlayed, true)
+	})
+
+	// The next track must be set on the player from the playback command queue
+	// goroutine, so it cannot race with play queue modifications.
+	p.engine.onNextTrackUpdateRequest = append(p.engine.onNextTrackUpdateRequest, func() {
+		p.cmdQueue.UpdateNextTrack()
+	})
 
 	p.OnSongChange(func(item mediaprovider.MediaItem, _ *mediaprovider.Track) {
 		if p.wasLoadTrackPaused {
@@ -150,6 +191,18 @@ func (p *PlaybackManager) NowPlaying() mediaprovider.MediaItem {
 
 func (p *PlaybackManager) NowPlayingIndex() int {
 	return p.engine.NowPlayingIndex()
+}
+
+// Registers a callback that is notified whenever the next-up media item changes.
+// The callback receives nil if there is no next item.
+func (p *PlaybackManager) OnBeforeSongChange(cb func(next mediaprovider.MediaItem)) {
+	p.engine.onBeforeSongChange = append(p.engine.onBeforeSongChange, cb)
+}
+
+// Registers a callback that is notified when playback stopped because the end
+// of the play queue was reached (not because the user stopped playback).
+func (p *PlaybackManager) OnQueueFinished(cb func(lastPlayed mediaprovider.MediaItem)) {
+	p.engine.onQueueFinished = append(p.engine.onQueueFinished, cb)
 }
 
 // Sets a callback that is notified whenever a new song begins playing.
@@ -498,7 +551,7 @@ func (p *PlaybackManager) GetLoopMode() LoopMode {
 }
 
 func (p *PlaybackManager) IsEndlessPlay() bool {
-	return p.cfg.EndlessPlay
+	return p.endlessPlay.Load()
 }
 
 func (p *PlaybackManager) PlaybackStatus() PlaybackStatus {
@@ -510,9 +563,15 @@ func (p *PlaybackManager) SetVolume(vol int) {
 }
 
 func (p *PlaybackManager) SetEndlessPlay(endlessPlay bool) {
+	p.endlessPlay.Store(endlessPlay)
 	p.cfg.EndlessPlay = endlessPlay
-	if endlessPlay && p.NowPlayingIndex() == p.engine.getPlayQueueLength()-1 {
-		p.enqueueEndlessPlayTracks()
+	if endlessPlay {
+		// a user initiated request should not be delayed by the retry interval
+		p.endlessPlayMu.Lock()
+		p.lastEndlessPlayAttempt = time.Time{}
+		p.endlessPlayMu.Unlock()
+		// no-op unless the queue is (nearly) exhausted, see endlessPlaySnapshot
+		p.requestEndlessPlayTracks(nil, false)
 	}
 }
 
@@ -596,92 +655,273 @@ func (p *PlaybackManager) IsPauseAfterCurrent() bool {
 	return p.engine.pauseAfterCurrent
 }
 
-func (p *PlaybackManager) enqueueEndlessPlayTracks() {
-	nowPlaying := p.NowPlaying()
-	if nowPlaying == nil {
+const (
+	// Number of not yet played tracks that may remain in the queue before more
+	// tracks are requested. Requesting with one track left in addition to the
+	// currently playing one gives the server a full track duration of lead time.
+	endlessPlayUpcomingTracks = 1
+	// Fallback trigger: seconds before the end of the current track.
+	endlessPlayTriggerSeconds = 30.0
+	// Minimum time between two (re-)attempts to fetch endless play tracks, so a
+	// failing/unreachable server is not hammered with requests.
+	endlessPlayRetryInterval = 15 * time.Second
+	// Number of already played tracks that are excluded from endless play
+	// candidates. The play queue grows indefinitely and is never trimmed, so
+	// recently played tracks must be tracked separately from the queue.
+	endlessPlayPlayedWindow = 500
+	// Batch size to use if EnqueueBatchSize is not configured.
+	endlessPlayDefaultBatchSize = 100
+)
+
+// Snapshot of the state needed to fetch endless play tracks. It is created from
+// the playback command queue goroutine, because it reads the play queue.
+type endlessPlaySnapshot struct {
+	// reference track for the "similar by artist"/"similar by genre" strategies
+	refTrack *mediaprovider.Track
+	// IDs of tracks that must never be added: the track that is currently
+	// playing and everything still queued after it
+	skipIDs map[string]struct{}
+	// IDs of the most recently played tracks.
+	playedIDs map[string]struct{}
+
+	skipOneStar bool
+	skipKeyword string
+	batchSize   int
+
+	// generation of the play queue when the snapshot was created; if it
+	// changed while the tracks were fetched, the result is discarded
+	queueGeneration uint64
+}
+
+// Requests more endless play tracks. May be called from any goroutine; the
+// actual queue inspection and fetching happens in the playback command queue
+// goroutine and in a separate fetch goroutine, respectively.
+// lastPlayed is the media item that was playing when playback ran out of
+// tracks; if nil, the currently playing item is used. resume requests that
+// playback is restarted with the appended tracks if the player is stopped.
+func (p *PlaybackManager) requestEndlessPlayTracks(lastPlayed mediaprovider.MediaItem, resume bool) {
+	p.endlessPlayMu.Lock()
+	if p.pendingEndlessPlay || time.Since(p.lastEndlessPlayAttempt) < endlessPlayRetryInterval {
+		p.endlessPlayMu.Unlock()
 		return
 	}
-	if nowPlaying.Metadata().Type == mediaprovider.MediaItemTypeRadioStation {
-		return
-	}
-
-	s := p.engine.sm.Server
-	if s == nil {
-		return
-	}
-
-	// last 500 played items
-	queue := p.GetActivePlayQueue()
-	if l := len(queue); l > 500 {
-		queue = queue[l-500:]
-	}
-
-	// tracks we will enqueue
-	var tracks []*mediaprovider.Track
-
-	filterEndlessPlayTracks := func(tracks []*mediaprovider.Track) []*mediaprovider.Track {
-		return sharedutil.FilterSlice(tracks, func(t *mediaprovider.Track) bool {
-			shouldSkip :=
-				(p.cfg.SkipOneStarWhenShuffling && t.Rating == 1) ||
-					(p.cfg.SkipKeywordWhenShuffling != "" && strcase.Contains(t.Title, p.cfg.SkipKeywordWhenShuffling))
-			recentlyPlayed := slices.ContainsFunc(queue, func(i mediaprovider.MediaItem) bool {
-				return i.Metadata().Type == mediaprovider.MediaItemTypeTrack && i.Metadata().ID == t.ID
-			})
-			return !shouldSkip && !recentlyPlayed
-		})
-	}
-
-	// since this func is invoked in a callback from the playback engine,
-	// need to do the rest async as it may take time and block other callbacks
 	p.pendingEndlessPlay = true
+	p.lastEndlessPlayAttempt = time.Now()
+	p.endlessPlayMu.Unlock()
+
+	p.cmdQueue.EnqueueEndlessPlay(lastPlayed, resume)
+}
+
+func (p *PlaybackManager) finishEndlessPlayRequest() {
+	p.endlessPlayMu.Lock()
+	p.pendingEndlessPlay = false
+	p.endlessPlayMu.Unlock()
+}
+
+// Must only be called from the playback command queue goroutine.
+func (p *PlaybackManager) enqueueEndlessPlayTracks(lastPlayed mediaprovider.MediaItem, resume bool) {
+	snap := p.endlessPlaySnapshot(lastPlayed, resume)
+	if snap == nil {
+		p.finishEndlessPlayRequest()
+		return
+	}
+
+	// fetching tracks may take a while, so do it asynchronously in order to not
+	// block playback commands
 	go func() {
-		defer func() { p.pendingEndlessPlay = false }()
-
-		// first 2 strategies - similar by artist, and similar by genres - only work for tracks
-		if nowPlaying.Metadata().Type == mediaprovider.MediaItemTypeTrack {
-			tr := nowPlaying.(*mediaprovider.Track)
-
-			// similar tracks by artist
-			if len(tr.ArtistIDs) > 0 {
-				similar, err := s.GetSimilarTracks(tr.ArtistIDs[0], p.appCfg.EnqueueBatchSize)
-				if err != nil {
-					log.Printf("endless play error: failed to get similar tracks: %v", err)
-				}
-				tracks = filterEndlessPlayTracks(similar)
-			}
-
-			// fallback to random tracks from genre
-			if len(tracks) == 0 {
-				for _, g := range tr.Genres {
-					if g == "" {
-						continue
-					}
-					byGenre, err := s.GetRandomTracks(g, p.appCfg.EnqueueBatchSize)
-					if err != nil {
-						log.Printf("endless play error: failed to get tracks by genre: %v", err)
-					}
-					tracks = filterEndlessPlayTracks(byGenre)
-					if len(tracks) > 0 {
-						break
-					}
-				}
-			}
-		}
-
-		// random tracks works regardless of the type of the last playing media
+		tracks := p.fetchEndlessPlayTracks(snap)
 		if len(tracks) == 0 {
-			// fallback to random tracks
-			random, err := s.GetRandomTracks("", p.appCfg.EnqueueBatchSize)
-			if err != nil {
-				log.Printf("endless play error: failed to get random tracks: %v", err)
-			}
-			tracks = filterEndlessPlayTracks(random)
+			p.finishEndlessPlayRequest()
+			return
 		}
-
-		if len(tracks) > 0 {
-			p.LoadTracks(tracks, Append, false /*no need to shuffle, already random*/)
-		}
+		items := sharedutil.CopyTrackSliceToMediaItemSlice(tracks)
+		p.cmdQueue.AppendEndlessPlay(items, snap, resume)
 	}()
+}
+
+// Appends fetched endless play tracks to the play queue. The result is
+// discarded if the play queue was replaced/modified while the tracks were
+// fetched or if endless play was disabled meanwhile.
+// Must only be called from the playback command queue goroutine.
+func (p *PlaybackManager) appendEndlessPlayTracks(items []mediaprovider.MediaItem, snap *endlessPlaySnapshot, resume bool) {
+	defer p.finishEndlessPlayRequest()
+
+	if len(items) == 0 || !p.endlessPlay.Load() {
+		return
+	}
+	if p.engine.getQueueGeneration() != snap.queueGeneration {
+		return
+	}
+	if err := p.engine.LoadItems(items, Append, false); err != nil {
+		log.Printf("endless play error: failed to append tracks: %v", err)
+		return
+	}
+	if resume {
+		p.resumePlaybackAfterEndlessAppend(len(items))
+	}
+}
+
+// Must only be called from the playback command queue goroutine.
+func (p *PlaybackManager) endlessPlaySnapshot(lastPlayed mediaprovider.MediaItem, resume bool) *endlessPlaySnapshot {
+	if !p.endlessPlay.Load() {
+		return nil
+	}
+
+	queue := p.engine.getActivePlayQueue()
+	queueLen := len(queue)
+
+	nowPlayingIdx := p.engine.NowPlayingIndex()
+	if nowPlayingIdx < 0 {
+		if !resume {
+			return nil
+		}
+		// playback already ran out of tracks, so the whole queue has been played
+		nowPlayingIdx = queueLen - 1
+	}
+	if nowPlayingIdx < 0 || queueLen == 0 {
+		return nil
+	}
+
+	// Only extend the queue when it is (nearly) exhausted, so endless play
+	// doesn't modify the queue while the user still has manually queued tracks.
+	if !resume && queueLen-1-nowPlayingIdx > endlessPlayUpcomingTracks {
+		return nil
+	}
+
+	refItem := lastPlayed
+	if refItem == nil {
+		refItem = p.engine.NowPlaying()
+	}
+	if refItem == nil {
+		return nil
+	}
+	refTrack, ok := refItem.(*mediaprovider.Track)
+	if !ok {
+		// endless play is not supported for radio stations
+		return nil
+	}
+
+	snap := &endlessPlaySnapshot{
+		refTrack:        refTrack,
+		skipIDs:         make(map[string]struct{}),
+		playedIDs:       make(map[string]struct{}),
+		skipOneStar:     p.cfg.SkipOneStarWhenShuffling,
+		skipKeyword:     p.cfg.SkipKeywordWhenShuffling,
+		batchSize:       p.appCfg.EnqueueBatchSize,
+		queueGeneration: p.engine.getQueueGeneration(),
+	}
+	if snap.batchSize <= 0 {
+		snap.batchSize = endlessPlayDefaultBatchSize
+	}
+
+	for i := nowPlayingIdx; i < queueLen; i++ {
+		snap.skipIDs[queue[i].Metadata().ID] = struct{}{}
+	}
+	// the queue is append-only, so the already played items are the ones
+	// *before* the now playing index (and not the last items of the queue)
+	playedStart := max(0, nowPlayingIdx-endlessPlayPlayedWindow)
+	for i := playedStart; i < nowPlayingIdx; i++ {
+		snap.playedIDs[queue[i].Metadata().ID] = struct{}{}
+	}
+	return snap
+}
+
+func (p *PlaybackManager) fetchEndlessPlayTracks(snap *endlessPlaySnapshot) []*mediaprovider.Track {
+	server := p.engine.sm.GetServer()
+	if server == nil {
+		return nil
+	}
+
+	// Prefer tracks that weren't played recently, but allow repeats of recently
+	// played tracks rather than running dry on small libraries.
+	pick := func(candidates []*mediaprovider.Track) []*mediaprovider.Track {
+		if tracks := p.filterEndlessPlayTracks(candidates, snap, true); len(tracks) > 0 {
+			return tracks
+		}
+		return p.filterEndlessPlayTracks(candidates, snap, false)
+	}
+
+	if ref := snap.refTrack; ref != nil {
+		// similar tracks by the same artist
+		if len(ref.ArtistIDs) > 0 {
+			similar, err := server.GetSimilarTracks(ref.ArtistIDs[0], snap.batchSize)
+			if err != nil {
+				log.Printf("endless play error: failed to get similar tracks: %v", err)
+			}
+			if tracks := pick(similar); len(tracks) > 0 {
+				return tracks
+			}
+		}
+		// fallback to random tracks from one of the track's genres
+		for _, g := range ref.Genres {
+			if g == "" {
+				continue
+			}
+			byGenre, err := server.GetRandomTracks(g, snap.batchSize)
+			if err != nil {
+				log.Printf("endless play error: failed to get tracks by genre: %v", err)
+			}
+			if tracks := pick(byGenre); len(tracks) > 0 {
+				return tracks
+			}
+		}
+	}
+
+	// fallback to random tracks
+	random, err := server.GetRandomTracks("", snap.batchSize)
+	if err != nil {
+		log.Printf("endless play error: failed to get random tracks: %v", err)
+	}
+	return pick(random)
+}
+
+func (p *PlaybackManager) filterEndlessPlayTracks(candidates []*mediaprovider.Track, snap *endlessPlaySnapshot, skipPlayed bool) []*mediaprovider.Track {
+	tracks := make([]*mediaprovider.Track, 0, len(candidates))
+	seen := make(map[string]struct{}, len(candidates))
+	for _, t := range candidates {
+		if t == nil {
+			continue
+		}
+		id := t.Metadata().ID
+		if _, ok := seen[id]; ok {
+			continue // duplicate within the fetched batch
+		}
+		if _, ok := snap.skipIDs[id]; ok {
+			continue // currently playing or already queued
+		}
+		if skipPlayed {
+			if _, ok := snap.playedIDs[id]; ok {
+				continue // played recently
+			}
+		}
+		if snap.skipOneStar && t.Rating == 1 {
+			continue
+		}
+		if snap.skipKeyword != "" && strcase.Contains(t.Title, snap.skipKeyword) {
+			continue
+		}
+		seen[id] = struct{}{}
+		tracks = append(tracks, t)
+	}
+	return tracks
+}
+
+// Must only be called from the playback command queue goroutine.
+func (p *PlaybackManager) resumePlaybackAfterEndlessAppend(appendedCount int) {
+	if !p.endlessPlay.Load() || p.engine.stopRequested.Load() {
+		return // endless play got disabled or the user stopped playback meanwhile
+	}
+	if p.engine.PlaybackStatus().State != player.Stopped {
+		return // playback is already running (or paused) again
+	}
+	// append inserts the tracks at the end of the queue
+	idx := p.engine.getPlayQueueLength() - appendedCount
+	if idx < 0 {
+		idx = 0
+	}
+	if err := p.engine.PlayTrackAt(idx); err != nil {
+		log.Printf("endless play error: failed to resume playback: %v", err)
+	}
 }
 
 func (p *PlaybackManager) runCmdQueue(ctx context.Context) {
@@ -746,6 +986,21 @@ func (p *PlaybackManager) runCmdQueue(ctx context.Context) {
 				)
 			case cmdLoadTrackPaused:
 				logIfErr("LoadTrackPaused", p.engine.loadTrackPaused(c.Arg.(int), c.Arg2.(float64)))
+			case cmdUpdateNextTrack:
+				logIfErr("UpdateNextTrack", p.engine.updateNextTrack())
+			case cmdEnqueueEndlessPlay:
+				// a nil interface cannot be type asserted, so check it explicitly
+				var lastPlayed mediaprovider.MediaItem
+				if c.Arg != nil {
+					lastPlayed = c.Arg.(mediaprovider.MediaItem)
+				}
+				p.enqueueEndlessPlayTracks(lastPlayed, c.Arg2.(bool))
+			case cmdAppendEndlessPlay:
+				p.appendEndlessPlayTracks(
+					c.Arg.([]mediaprovider.MediaItem),
+					c.Arg2.(*endlessPlaySnapshot),
+					c.Arg3.(bool),
+				)
 			case cmdForceRestartPlayback:
 				if mpv, ok := p.engine.CurrentPlayer().(*mpv.Player); ok {
 					log.Println("Force-restarting MPV playback")
@@ -765,4 +1020,3 @@ func (p *PlaybackManager) runCmdQueue(ctx context.Context) {
 		}
 	}
 }
-

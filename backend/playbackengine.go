@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"slices"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/thenktor/discnegative/backend/mediaprovider"
@@ -73,6 +74,9 @@ type playbackEngine struct {
 
 	playQueue         []mediaprovider.MediaItem
 	shuffledPlayQueue []mediaprovider.MediaItem
+	// incremented whenever the play queue is replaced/modified in a way that
+	// invalidates previously created queue snapshots (e.g. endless play)
+	queueGeneration atomic.Uint64
 
 	nowPlayingIdx int
 	isRadio       bool
@@ -100,8 +104,15 @@ type playbackEngine struct {
 
 	// Whether we need to set the next track on the Player
 	// before the current track completes (normally when 10 seconds remain
-	// in the time pos polling function)
-	needToSetNextTrack bool
+	// in the time pos polling function). The flag is set from the play queue
+	// mutating goroutine and consumed by the time pos polling goroutine, so it
+	// must be accessed atomically to avoid losing wake-ups.
+	needToSetNextTrack atomic.Bool
+
+	// Set when playback was stopped explicitly (by the user or by a queue
+	// modifying operation) rather than by the play queue running out of
+	// tracks. Used to distinguish both cases in the onQueueFinished callback.
+	stopRequested atomic.Bool
 
 	// to pass to onSongChange listeners; clear once listeners have been called
 	lastScrobbled *mediaprovider.Track
@@ -130,6 +141,13 @@ type playbackEngine struct {
 	onStopped         []func()
 	onPlaying         []func()
 	onQueueChange     []func()
+
+	// invoked when playback stopped because the end of the play queue was
+	// reached (i.e. not because the user stopped playback)
+	onQueueFinished []func(lastPlayed mediaprovider.MediaItem)
+	// invoked when the next track should be set on the player; the playback
+	// engine itself must not modify the play queue from arbitrary goroutines
+	onNextTrackUpdateRequest []func()
 
 	onRadioMetadataChange []func(radioName, title, artist string)
 }
@@ -276,8 +294,16 @@ func (p *playbackEngine) getPlayQueueLength() int {
 	return len(p.getActivePlayQueue())
 }
 
+func (p *playbackEngine) getQueueGeneration() uint64 {
+	return p.queueGeneration.Load()
+}
+
 func (p *playbackEngine) clearPlayQueue() {
 	p.checkScrobble()
+	p.queueGeneration.Add(1)
+	// stopping the player as part of a queue modification must not be treated
+	// as "the queue ran out of tracks"
+	p.stopRequested.Store(true)
 	p.player.Stop(false)
 	p.nowPlayingIdx = -1
 	p.playQueue = nil
@@ -337,6 +363,7 @@ func (p *playbackEngine) loadTrackPaused(idx int, startTime float64) error {
 	if l := p.getPlayQueueLength(); idx < 0 || idx >= l {
 		return fmt.Errorf("track index (%d) out of range (0-%d)", idx, l)
 	}
+	p.stopRequested.Store(false)
 	p.nowPlayingIdx = idx
 	nowPlaying := p.getPlayQueueItemAt(idx)
 	_, p.isRadio = nowPlaying.(*mediaprovider.RadioStation)
@@ -364,6 +391,7 @@ func (p *playbackEngine) playTrackAt(idx int, startTime float64) error {
 	if l := p.getPlayQueueLength(); idx < 0 || idx >= l {
 		return fmt.Errorf("track index (%d) out of range (0-%d)", idx, l)
 	}
+	p.stopRequested.Store(false)
 	p.pendingLoadPaused = false
 	// scrobble current track if needed
 	p.checkScrobble()
@@ -536,6 +564,7 @@ func (p *playbackEngine) IsSeeking() bool {
 }
 
 func (p *playbackEngine) Stop() error {
+	p.stopRequested.Store(true)
 	if p.pendingLoadPaused {
 		p.pendingLoadPaused = false
 		p.pendingLoadStartTime = 0
@@ -553,6 +582,7 @@ func (p *playbackEngine) Pause() error {
 }
 
 func (p *playbackEngine) Continue() error {
+	p.stopRequested.Store(false)
 	if p.pendingLoadPaused {
 		p.pendingLoadPaused = false
 		// Use pendingTrackChangeNum so handleOnTrackChange doesn't advance nowPlayingIdx.
@@ -576,6 +606,7 @@ func (p *playbackEngine) Continue() error {
 // Load items into the specified queue(s). This overrides the queue. For standard inserts or replaces use p.LoadItems
 // This is used on program startup to populate both the playQueue and shuffledPlayQueue with the previously saved client state.
 func (p *playbackEngine) SetQueueState(tracks []*mediaprovider.Track, queueType QueueType) error {
+	p.queueGeneration.Add(1)
 	newTracks := sharedutil.CopyTrackSliceToMediaItemSlice(tracks)
 	switch queueType {
 	case PlayQueue:
@@ -719,6 +750,7 @@ func (p *playbackEngine) OnTrackRatingChanged(id string, rating int) {
 // Does not stop playback if the currently playing track is in the new queue,
 // but updates the now playing index to point to the first instance of the track in the new queue.
 func (p *playbackEngine) UpdatePlayQueue(items []mediaprovider.MediaItem) error {
+	p.queueGeneration.Add(1)
 	newQueue := deepCopyMediaItemSlice(items)
 	newNowPlayingIdx := -1
 	if p.nowPlayingIdx >= 0 {
@@ -748,6 +780,7 @@ func (p *playbackEngine) UpdatePlayQueue(items []mediaprovider.MediaItem) error 
 }
 
 func (p *playbackEngine) RemoveTracksFromQueue(idxs []int) {
+	p.queueGeneration.Add(1)
 	isPlayingTrackRemoved := false
 	isNextPlayingTrackremoved := false
 	nowPlaying := p.NowPlayingIndex()
@@ -951,16 +984,33 @@ func (p *playbackEngine) handleOnStopped() {
 	p.invokeOnSongChangeCallbacks()
 	p.invokeNoArgCallbacks(p.onStopped)
 	p.reportPlayback("stopped")
+
+	// notify listeners if playback ended because the play queue ran out of
+	// tracks (as opposed to the user stopping playback)
+	queueLen := p.getPlayQueueLength()
+	queueFinished := queueLen > 0 && !p.stopRequested.Load() &&
+		p.nowPlayingIdx >= queueLen-1 && !p.isRadio
+	var lastPlayed mediaprovider.MediaItem
+	if queueFinished {
+		lastPlayed = p.getPlayQueueItemAt(min(p.nowPlayingIdx, queueLen-1))
+	}
+
 	p.alreadyScrobbled = false
 	p.wasStopped = true
 	p.nowPlayingIdx = -1
 	p.pauseAfterCurrent = false
+
+	if queueFinished {
+		for _, cb := range p.onQueueFinished {
+			cb(lastPlayed)
+		}
+	}
 }
 
 // to be invoked as soon as the next item in the queue that should play changes
 func (p *playbackEngine) handleNextTrackUpdated() {
 	p.cacheNextTracks()
-	p.needToSetNextTrack = true
+	p.needToSetNextTrack.Store(true)
 	for _, cb := range p.onBeforeSongChange {
 		var item mediaprovider.MediaItem
 		if idx := p.nextPlayingIndex(); idx >= 0 {
@@ -1068,6 +1118,31 @@ func (p *playbackEngine) getMediaURLForIdx(idx int) string {
 
 func (p *playbackEngine) setNextTrack(idx int) error {
 	return p.setTrack(idx, true, 0)
+}
+
+// Requests that the next track is (re-)set on the player. If a listener is
+// registered (usually the playback command queue), the update is executed
+// there, so it cannot race with play queue modifications.
+func (p *playbackEngine) requestNextTrackUpdate() {
+	if len(p.onNextTrackUpdateRequest) == 0 {
+		if err := p.updateNextTrack(); err != nil {
+			log.Printf("failed to set next track: %v", err)
+		}
+		return
+	}
+	for _, cb := range p.onNextTrackUpdateRequest {
+		cb()
+	}
+}
+
+// Sets the next track on the player. Must only be called from the playback
+// command queue goroutine, as it reads the play queue.
+func (p *playbackEngine) updateNextTrack() error {
+	if nextIdx := p.nextPlayingIndex(); nextIdx >= 0 && nextIdx < p.getPlayQueueLength() {
+		return p.setNextTrack(nextIdx)
+	}
+	// no next track to play, ensure player knows this
+	return p.setNextTrack(-1)
 }
 
 // call BEFORE updating p.nowPlayingIdx
@@ -1197,14 +1272,8 @@ func (p *playbackEngine) handleTimePosUpdate(seeked bool) {
 		meta = np.Metadata()
 	}
 	isNearEnd := meta.Type != mediaprovider.MediaItemTypeRadioStation && s.TimePos > meta.Duration.Seconds()-10
-	if p.needToSetNextTrack && isNearEnd {
-		p.needToSetNextTrack = false
-		if nextIdx := p.nextPlayingIndex(); nextIdx >= 0 && nextIdx < len(p.playQueue) {
-			p.setNextTrack(nextIdx)
-		} else {
-			// no next track to play, ensure player knows this
-			p.setNextTrack(-1)
-		}
+	if isNearEnd && p.needToSetNextTrack.CompareAndSwap(true, false) {
+		p.requestNextTrackUpdate()
 	}
 	if p.callbacksDisabled {
 		return

@@ -32,6 +32,18 @@ const (
 	cmdForceRestartPlayback
 
 	cmdLoadTrackPaused // arg: int (idx), arg2: float64 (startTime)
+
+	// sets/updates the next track on the player using the current play queue
+	cmdUpdateNextTrack
+	// request more endless play tracks
+	// arg: mediaprovider.MediaItem (last played item, may be nil)
+	// arg2: bool (resume playback after appending the tracks)
+	cmdEnqueueEndlessPlay
+	// append fetched endless play tracks to the play queue
+	// arg: []mediaprovider.MediaItem
+	// arg2: *endlessPlaySnapshot
+	// arg3: bool (resume playback after appending the tracks)
+	cmdAppendEndlessPlay
 )
 
 type playbackCommand struct {
@@ -159,6 +171,33 @@ func (c *playbackCommandQueue) LoadItems(items []mediaprovider.MediaItem, insert
 		Arg:  items,
 		Arg2: insertQueueMode,
 		Arg3: shuffle,
+	})
+	c.mutex.Unlock()
+	c.cmdAvailable.Signal()
+}
+
+func (c *playbackCommandQueue) AppendEndlessPlay(items []mediaprovider.MediaItem, snap *endlessPlaySnapshot, resume bool) {
+	c.mutex.Lock()
+	c.queue = append(c.queue, playbackCommand{
+		Type: cmdAppendEndlessPlay,
+		Arg:  items,
+		Arg2: snap,
+		Arg3: resume,
+	})
+	c.mutex.Unlock()
+	c.cmdAvailable.Signal()
+}
+
+func (c *playbackCommandQueue) UpdateNextTrack() {
+	c.addCommand(playbackCommand{Type: cmdUpdateNextTrack})
+}
+
+func (c *playbackCommandQueue) EnqueueEndlessPlay(lastPlayed mediaprovider.MediaItem, resume bool) {
+	c.mutex.Lock()
+	c.queue = append(c.queue, playbackCommand{
+		Type: cmdEnqueueEndlessPlay,
+		Arg:  lastPlayed,
+		Arg2: resume,
 	})
 	c.mutex.Unlock()
 	c.cmdAvailable.Signal()
