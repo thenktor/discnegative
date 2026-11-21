@@ -703,17 +703,24 @@ func (p *playbackEngine) doLoaditems(items []mediaprovider.MediaItem, insertQueu
 }
 
 func (p *playbackEngine) LoadRadioStation(radio *mediaprovider.RadioStation, insertMode InsertQueueMode) {
+	// only the queue that is actually in use may be touched: the shuffled queue
+	// is only populated while shuffling is enabled (see doLoaditems)
+	queueType := PlayQueue
+	if p.shuffle {
+		queueType = Both
+	}
 	if insertMode == Replace {
 		p.clearPlayQueue()
 	}
 	if nextChanged := insertMode == InsertNext || (insertMode == Append && p.nowPlayingIdx == p.getPlayQueueLength()-1); nextChanged {
-		p.handleNextTrackUpdated()
+		// the next track can only be determined once the station is inserted
+		defer p.handleNextTrackUpdated()
 	}
 	insertIdx := p.getPlayQueueLength()
 	if insertMode == InsertNext {
 		insertIdx = p.nowPlayingIdx + 1
 	}
-	p.insertItemsIntoPlayQueueAt([]mediaprovider.MediaItem{radio}, insertIdx, Both)
+	p.insertItemsIntoPlayQueueAt([]mediaprovider.MediaItem{radio}, insertIdx, queueType)
 	p.invokeNoArgCallbacks(p.onQueueChange)
 }
 
