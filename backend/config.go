@@ -144,8 +144,11 @@ type ScrobbleConfig struct {
 }
 
 type ReplayGainConfig struct {
-	Mode            string
-	PreampGainDB    float64
+	Mode         string
+	PreampGainDB float64
+	// FallbackGainDB is applied to audio without ReplayGain information, e.g.
+	// radio stations or files without ReplayGain tags.
+	FallbackGainDB  float64
 	PreventClipping bool
 }
 
@@ -272,6 +275,7 @@ func DefaultConfig(appVersionTag string) *Config {
 		ReplayGain: ReplayGainConfig{
 			Mode:            ReplayGainNone,
 			PreampGainDB:    0.0,
+			FallbackGainDB:  0.0,
 			PreventClipping: true,
 		},
 		Transcoding: TranscodingConfig{

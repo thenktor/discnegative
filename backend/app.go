@@ -386,6 +386,7 @@ func (a *App) setupMPV() error {
 		Mode:            mode,
 		PreventClipping: a.Config.ReplayGain.PreventClipping,
 		PreampGain:      a.Config.ReplayGain.PreampGainDB,
+		FallbackGain:    a.Config.ReplayGain.FallbackGainDB,
 	})
 	a.LocalPlayer.SetAudioExclusive(a.Config.LocalPlayback.AudioExclusive)
 	a.LocalPlayer.SetPauseFade(a.Config.LocalPlayback.PauseFade)

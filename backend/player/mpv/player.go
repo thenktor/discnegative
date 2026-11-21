@@ -260,6 +260,10 @@ func (p *Player) SetReplayGainOptions(options player.ReplayGainOptions) error {
 		if err := p.mpv.SetProperty("replaygain-preamp", mpv.FORMAT_DOUBLE, options.PreampGain); err != nil {
 			return err
 		}
+		// applied to audio without ReplayGain information (e.g. radio stations)
+		if err := p.mpv.SetProperty("replaygain-fallback", mpv.FORMAT_DOUBLE, options.FallbackGain); err != nil {
+			return err
+		}
 		clip := "yes"
 		if options.PreventClipping {
 			clip = "no"

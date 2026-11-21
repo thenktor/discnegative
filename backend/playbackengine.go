@@ -896,6 +896,7 @@ func (p *playbackEngine) SetReplayGainOptions(config ReplayGainConfig) {
 		Mode:            mode,
 		PreventClipping: config.PreventClipping,
 		PreampGain:      config.PreampGainDB,
+		FallbackGain:    config.FallbackGainDB,
 	})
 }
 
@@ -908,6 +909,7 @@ func (p *playbackEngine) SetReplayGainMode(mode player.ReplayGainMode) {
 	rGainPlayer.SetReplayGainOptions(player.ReplayGainOptions{
 		PreventClipping: p.replayGainCfg.PreventClipping,
 		PreampGain:      p.replayGainCfg.PreampGainDB,
+		FallbackGain:    p.replayGainCfg.FallbackGainDB,
 		Mode:            mode,
 	})
 }

@@ -73,7 +73,9 @@ type ReplayGainOptions struct {
 	Mode            ReplayGainMode
 	PreampGain      float64
 	PreventClipping bool
-	// Fallback gain intentionally omitted
+	// FallbackGain is applied to audio without ReplayGain information, e.g.
+	// radio stations or files without ReplayGain tags.
+	FallbackGain float64
 }
 
 func (r ReplayGainMode) String() string {

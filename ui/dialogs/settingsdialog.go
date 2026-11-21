@@ -398,6 +398,26 @@ func (s *SettingsDialog) createPlaybackTab(isLocalPlayer, isReplayGainPlayer boo
 	}
 	preampGain.Text = strconv.Itoa(int(initVal))
 
+	// gain for audio without ReplayGain information, e.g. radio stations
+	fallbackGain := widgets.NewTextRestrictedEntry(func(curText, _ string, r rune) bool {
+		return (curText == "" && r == '-') ||
+			(unicode.IsDigit(r) && len(curText) < 3)
+	})
+	fallbackGain.SetMinCharWidth(3)
+	fallbackGain.OnChanged = func(text string) {
+		if f, err := strconv.ParseFloat(text, 64); err == nil {
+			s.config.ReplayGain.FallbackGainDB = f
+			s.onReplayGainSettingsChanged()
+		}
+	}
+	initFallbackVal := math.Round(s.config.ReplayGain.FallbackGainDB)
+	if initFallbackVal < -20 {
+		initFallbackVal = -20
+	} else if initFallbackVal > 20 {
+		initFallbackVal = 20
+	}
+	fallbackGain.Text = strconv.Itoa(int(initFallbackVal))
+
 	preventClipping := widget.NewCheck("", func(checked bool) {
 		s.config.ReplayGain.PreventClipping = checked
 		s.onReplayGainSettingsChanged()
@@ -472,6 +492,7 @@ func (s *SettingsDialog) createPlaybackTab(isLocalPlayer, isReplayGainPlayer boo
 		container.New(layout.NewFormLayout(),
 			widget.NewLabel(lang.L("ReplayGain mode")), container.NewGridWithColumns(2, replayGainSelect),
 			widget.NewLabel(lang.L("ReplayGain preamp")), container.NewHBox(preampGain, widget.NewLabel("dB")),
+			widget.NewLabel(lang.L("Pregain for files without ReplayGain")), container.NewHBox(fallbackGain, widget.NewLabel("dB")),
 			widget.NewLabel(lang.L("Prevent clipping")), preventClipping,
 		),
 		s.newSectionSeparator(),
