@@ -29,6 +29,9 @@ type ImagePlaceholder struct {
 
 	OnTapped          func(*fyne.PointEvent)
 	OnTappedSecondary func(*fyne.PointEvent)
+
+	// catches taps on the placeholder, which is shown instead of an image
+	placeholderTaps *TapCatcher
 }
 
 func NewImagePlaceholder(centerIcon fyne.Resource, minSize float32) *ImagePlaceholder {
@@ -44,10 +47,14 @@ func NewImagePlaceholder(centerIcon fyne.Resource, minSize float32) *ImagePlaceh
 	i.border = myTheme.NewThemedRectangle(theme.ColorNameBackground)
 	i.border.BorderColorName = theme.ColorNameForeground
 	i.border.BorderWidth = 3
+	i.placeholderTaps = NewTapCatcher(i.onTapped)
+	i.placeholderTaps.OnTappedSecondary = i.onTappedSecondary
+	i.placeholderTaps.Hidden = true
 	i.content = container.NewStack(
 		i.border,
 		container.NewCenter(i.iconImage),
 		i.imageDisp,
+		i.placeholderTaps,
 	)
 	return i
 }
@@ -108,6 +115,9 @@ func (i *ImagePlaceholder) Refresh() {
 	i.iconImage.Resource = i.PlaceholderIcon
 	i.iconImage.Hidden = i.HaveImage()
 	i.imageDisp.Hidden = !i.HaveImage()
+	// only catch taps on the placeholder if there is a handler for them; hiding
+	// the catcher keeps taps going to the parent widget otherwise
+	i.placeholderTaps.Hidden = i.HaveImage() || (i.OnTapped == nil && i.OnTappedSecondary == nil)
 	i.imageDisp.ScaleMode = i.ScaleMode
 	i.iconImage.ScaleMode = i.ScaleMode
 	i.imageDisp.CornerRadius = i.Theme().Size(myTheme.SizeNameImageCornerRadius)

@@ -164,6 +164,7 @@ func (n *NowPlayingCard) Update(track mediaprovider.MediaItem) {
 	n.trackName.SetMenuBtnEnabled(n.cover.PlaceholderIcon != myTheme.RadioIcon)
 	n.artistName.Hidden = len(n.artistName.Segments) == 0
 	n.albumName.Hidden = len(n.albumName.Segments) == 0
+	n.cover.Refresh()
 	n.Refresh()
 }
 

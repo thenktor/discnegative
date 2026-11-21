@@ -1,6 +1,8 @@
 package widgets
 
 import (
+	"image/color"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
@@ -114,4 +116,44 @@ func (t *TappableImage) CreateRenderer() fyne.WidgetRenderer {
 
 func (t *TappableImage) haveImage() bool {
 	return t.Image.Resource != nil || t.Image.Image != nil
+}
+
+// TapCatcher is an invisible widget that reports taps in its whole area. It is
+// used to make the placeholder of an ImagePlaceholder tappable, which otherwise
+// only reacts to taps on the cover image itself.
+type TapCatcher struct {
+	widget.BaseWidget
+
+	DisableTapping    bool
+	OnTapped          func(*fyne.PointEvent)
+	OnTappedSecondary func(*fyne.PointEvent)
+}
+
+func NewTapCatcher(onTapped func(*fyne.PointEvent)) *TapCatcher {
+	t := &TapCatcher{OnTapped: onTapped}
+	t.ExtendBaseWidget(t)
+	return t
+}
+
+func (t *TapCatcher) Tapped(e *fyne.PointEvent) {
+	if !t.DisableTapping && t.OnTapped != nil {
+		t.OnTapped(e)
+	}
+}
+
+func (t *TapCatcher) TappedSecondary(e *fyne.PointEvent) {
+	if !t.DisableTapping && t.OnTappedSecondary != nil {
+		t.OnTappedSecondary(e)
+	}
+}
+
+func (t *TapCatcher) Cursor() desktop.Cursor {
+	if t.DisableTapping {
+		return desktop.DefaultCursor
+	}
+	return desktop.PointerCursor
+}
+
+func (t *TapCatcher) CreateRenderer() fyne.WidgetRenderer {
+	return widget.NewSimpleRenderer(canvas.NewRectangle(color.Transparent))
 }
