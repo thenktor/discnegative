@@ -4,6 +4,9 @@ ICONS := res/appicon.png res/appicon-256.png
 
 IOS_XCFRAMEWORKS := Avcodec Avfilter Avformat Avutil Mbedcrypto Mbedtls Mbedx509 Mpv Swresample Swscale
 
+# Build the binary when make is called without a target.
+.DEFAULT_GOAL := build
+
 BUILDINFO := codeberg.org/unixery/buildinfo
 
 # Version information is derived from git (same approach as ../lyrunderground):
